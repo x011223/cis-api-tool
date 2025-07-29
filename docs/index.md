@@ -51,4 +51,4 @@ pnpm add yapi-to-typescript
 
 ## 许可
 
-[MIT](https://github.com/fjc0k/yapi-to-typescript/blob/master/LICENSE) © [Jay Fong](https://github.com/fjc0k)
+[MIT](https://github.com/x011223/cis-api-tool.git/blob/master/LICENSE) © [Jay Fong](https://github.com/fjc0k)

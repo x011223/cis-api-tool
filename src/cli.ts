@@ -71,7 +71,7 @@ export async function run(
           查看帮助: ytt help
 
         # GitHub
-          https://github.com/fjc0k/yapi-to-typescript
+          https://github.com/x011223/cis-api-tool.git
       `}\n`,
     )
   } else if (cmd === 'init') {

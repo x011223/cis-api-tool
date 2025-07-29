@@ -87,7 +87,7 @@ export class Generator {
         }
         if (item.serverUrl) {
           // 去除地址后面的 /
-          // fix: https://github.com/fjc0k/yapi-to-typescript/issues/22
+          // fix: https://github.com/x011223/cis-api-tool.git/issues/22
           item.serverUrl = item.serverUrl.replace(/\/+$/, '')
         }
         return item

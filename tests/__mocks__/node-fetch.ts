@@ -1159,9 +1159,9 @@ const mockData: Record<string, () => any> = {
           req_query: [],
           req_headers: [],
           req_body_form: [],
-          desc: '<p><a href="https://github.com/fjc0k/yapi-to-typescript/issues/17">https://github.com/fjc0k/yapi-to-typescript/issues/17</a></p>\n',
+          desc: '<p><a href="https://github.com/x011223/cis-api-tool.git/issues/17">https://github.com/x011223/cis-api-tool.git/issues/17</a></p>\n',
           markdown:
-            '[https://github.com/fjc0k/yapi-to-typescript/issues/17](https://github.com/fjc0k/yapi-to-typescript/issues/17)',
+            '[https://github.com/x011223/cis-api-tool.git/issues/17](https://github.com/x011223/cis-api-tool.git/issues/17)',
           res_body: '{"type":"object","title":"empty object","properties":{}}',
           uid: 11,
           add_time: 1610557430,

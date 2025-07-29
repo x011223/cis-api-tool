@@ -15,6 +15,6 @@ module.exports = defineConfig({
 
     ---
 
-    [进入主页→](https://github.com/fjc0k/yapi-to-typescript)
+    [进入主页→](https://github.com/x011223/cis-api-tool.git)
   `,
 })

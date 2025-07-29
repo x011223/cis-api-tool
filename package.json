@@ -1,15 +1,15 @@
 {
-  "name": "yapi-to-typescript",
-  "version": "3.38.0",
+  "name": "@cis/api-tool",
+  "version": "1.0.0",
   "description": "根据 YApi 的接口定义生成 TypeScript/JavaScript 的接口类型及其请求函数代码。",
   "keywords": [
     "yapi",
     "codegen",
     "typescript"
   ],
-  "homepage": "https://github.com/fjc0k/yapi-to-typescript",
+  "homepage": "https://github.com/x011223/cis-api-tool.git",
   "bugs": {
-    "url": "https://github.com/fjc0k/yapi-to-typescript/issues"
+    "url": "https://github.com/x011223/cis-api-tool.git/issues"
   },
   "repository": {
     "type": "git",
