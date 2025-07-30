@@ -1,4 +1,4 @@
-import { AsyncOrSync, LiteralUnion, OmitStrict, OneOrMore } from 'vtils/types'
+import { AsyncOrSync, LiteralUnion, OmitStrict, OneOrMore } from './vutils/type'
 import { JSONSchema4, JSONSchema4TypeName } from 'json-schema'
 import { ParsedPath } from 'path'
 

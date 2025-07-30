@@ -7,8 +7,8 @@ import path from 'path'
 import prompt from 'prompts'
 import yargs from 'yargs'
 import { ConfigWithHooks, ServerConfig } from './types'
-import { dedent, wait } from 'vtils'
-import { Defined } from 'vtils/types'
+import { dedent, wait } from './vutils/function'
+import { Defined } from './vutils/type'
 import { Generator } from './Generator'
 
 TSNode.register({

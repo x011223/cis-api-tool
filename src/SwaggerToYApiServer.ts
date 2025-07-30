@@ -2,9 +2,9 @@ import getAvailablePort from 'get-port'
 import http from 'http'
 import onExit from 'signal-exit'
 import url from 'url'
-import { AsyncReturnType } from 'vtils/types'
+import type { AsyncReturnType } from './vutils/type'
 import { httpGet } from './utils'
-import { isEmpty as vtilsIsEmpty } from 'vtils'
+import isEmpty from 'lodash/isEmpty'
 import { swaggerJsonToYApiData } from './swaggerJsonToYApiData'
 import { OpenAPIV2 as SwaggerType } from 'openapi-types'
 
@@ -37,7 +37,7 @@ export class SwaggerToYApiServer {
   }
 
   async getSwaggerJson(): Promise<SwaggerType.Document> {
-    if (vtilsIsEmpty(this.swaggerJson)) {
+    if (isEmpty(this.swaggerJson)) {
       const res = await httpGet<SwaggerType.Document>(
         this.options.swaggerJsonUrl,
       )
@@ -47,7 +47,7 @@ export class SwaggerToYApiServer {
   }
 
   async getYApiData(): Promise<AsyncReturnType<typeof swaggerJsonToYApiData>> {
-    if (vtilsIsEmpty(this.yapiData)) {
+    if (isEmpty(this.yapiData)) {
       this.yapiData = await swaggerJsonToYApiData(await this.getSwaggerJson())
     }
     return this.yapiData

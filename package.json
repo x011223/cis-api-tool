@@ -68,6 +68,7 @@
     "get-port": "^5.1.1",
     "json-schema-to-typescript": "^10.1.4",
     "json5": "^2.1.0",
+    "lodash": "^4.17.21",
     "node-fetch": "^2",
     "ora": "^3.4.0",
     "prettier": "^2.7.1",
@@ -76,9 +77,10 @@
     "signal-exit": "^3.0.3",
     "swagger-client": "3.18.4",
     "to-json-schema": "^0.2.5",
+    "traverse": "^0.6.11",
+    "ts-dedent": "^2.2.0",
     "ts-node": "^8.0.2",
     "typescript": "^4.2.3",
-    "vtils": "^4.57.0",
     "yargs": "^16.2.0"
   },
   "devDependencies": {
@@ -105,6 +107,8 @@
     "shx": "^0.3.2",
     "standard-version": "^9.3.2",
     "tempy": "^0.3.0",
+    "ts-essentials": "^10.1.1",
+    "type-fest": "^4.41.0",
     "typedoc": "^0.14.2",
     "typescript-snapshots-plugin": "^1.7.0"
   },

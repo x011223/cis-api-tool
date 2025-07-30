@@ -5,20 +5,17 @@ import path from 'path'
 import prettier from 'prettier'
 import ProxyAgent from 'proxy-agent'
 import toJsonSchema from 'to-json-schema'
-import {
-  castArray,
-  cloneDeepFast,
-  forOwn,
-  isArray,
-  isEmpty,
-  isObject,
-  mapKeys,
-  memoize,
-  run,
-  traverse,
-} from 'vtils'
+import castArray from 'lodash/castArray'
+import cloneDeep from 'lodash/cloneDeep'
+import forOwn from 'lodash/forOwn'
+import isArray from 'lodash/isArray'
+import isEmpty from 'lodash/isEmpty'
+import isObject from 'lodash/isObject'
+import mapKeys from 'lodash/mapKeys'
+import memoize from 'lodash/memoize'
+import { traverse } from './vutils/function'
 import { compile, Options } from 'json-schema-to-typescript'
-import { Defined, OneOrMore } from 'vtils/types'
+import { Defined, OneOrMore } from './vutils/type'
 import { FileData } from './helpers'
 import {
   Interface,
@@ -34,8 +31,7 @@ import { JSONSchema4, JSONSchema4TypeName } from 'json-schema'
 import { URL } from 'url'
 
 /**
- * 抛出错误。
- *
+ * @description 抛出错误。
  * @param msg 错误信息
  */
 export function throwError(...msg: string[]): never {
@@ -44,8 +40,7 @@ export function throwError(...msg: string[]): never {
 }
 
 /**
- * 将路径统一为 unix 风格的路径。
- *
+ * @description 将路径统一为 unix 风格的路径。
  * @param path 路径
  * @returns unix 风格的路径
  */
@@ -54,8 +49,7 @@ export function toUnixPath(path: string) {
 }
 
 /**
- * 获得规范化的相对路径。
- *
+ * @description 获得规范化的相对路径。
  * @param from 来源路径
  * @param to 去向路径
  * @returns 相对路径
@@ -67,7 +61,7 @@ export function getNormalizedRelativePath(from: string, to: string) {
 }
 
 /**
- * 原地遍历 JSONSchema。
+ * @description 原地遍历 JSONSchema。
  */
 export function traverseJsonSchema(
   jsonSchema: JSONSchema4,
@@ -82,9 +76,9 @@ export function traverseJsonSchema(
 
   // Mock.toJSONSchema 产生的 properties 为数组，然而 JSONSchema4 的 properties 为对象
   if (isArray(jsonSchema.properties)) {
-    jsonSchema.properties = (jsonSchema.properties as unknown as JSONSchema4[]).reduce<
-      Defined<JSONSchema4['properties']>
-    >((props, js) => {
+    jsonSchema.properties = (
+      jsonSchema.properties as unknown as JSONSchema4[]
+    ).reduce<Defined<JSONSchema4['properties']>>((props, js) => {
       props[js.name] = js
       return props
     }, {})
@@ -110,25 +104,30 @@ export function traverseJsonSchema(
 
   // 处理 oneOf
   if (jsonSchema.oneOf) {
-    jsonSchema.oneOf.forEach((item: any) => traverseJsonSchema(item, cb, currentPath))
+    jsonSchema.oneOf.forEach((item: any) =>
+      traverseJsonSchema(item, cb, currentPath),
+    )
   }
 
   // 处理 anyOf
   if (jsonSchema.anyOf) {
-    jsonSchema.anyOf.forEach((item: any) => traverseJsonSchema(item, cb, currentPath))
+    jsonSchema.anyOf.forEach((item: any) =>
+      traverseJsonSchema(item, cb, currentPath),
+    )
   }
 
   // 处理 allOf
   if (jsonSchema.allOf) {
-    jsonSchema.allOf.forEach((item: any) => traverseJsonSchema(item, cb, currentPath))
+    jsonSchema.allOf.forEach((item: any) =>
+      traverseJsonSchema(item, cb, currentPath),
+    )
   }
 
   return jsonSchema
 }
 
 /**
- * 原地处理 JSONSchema。
- *
+ * @description 原地处理 JSONSchema。
  * @param jsonSchema 待处理的 JSONSchema
  * @returns 处理后的 JSONSchema
  */
@@ -163,7 +162,9 @@ export function processJsonSchema(
         bigdecimal: 'number',
         char: 'string',
         void: 'null',
-        ...mapKeys(customTypeMapping, (_: any, key: string) => key.toLowerCase()),
+        ...mapKeys(customTypeMapping, (_: any, key: string) =>
+          key.toLowerCase(),
+        ),
       }
       const isMultiple = Array.isArray(jsonSchema.type)
       const types = castArray(jsonSchema.type).map((type: any) => {
@@ -193,8 +194,7 @@ export function processJsonSchema(
 }
 
 /**
- * 获取适用于 JSTT 的 JSONSchema。
- *
+ * @description 获取适用于 JSTT 的 JSONSchema。
  * @param jsonSchema 待处理的 JSONSchema
  * @returns 适用于 JSTT 的 JSONSchema
  */
@@ -255,8 +255,7 @@ export function jsonSchemaToJSTTJsonSchema(
 }
 
 /**
- * 将 JSONSchema 字符串转为 JSONSchema 对象。
- *
+ * @description 将 JSONSchema 字符串转为 JSONSchema 对象。
  * @param str 要转换的 JSONSchema 字符串
  * @returns 转换后的 JSONSchema 对象
  */
@@ -268,8 +267,7 @@ export function jsonSchemaStringToJsonSchema(
 }
 
 /**
- * 获得 JSON 数据的 JSONSchema 对象。
- *
+ * @description 获得 JSON 数据的 JSONSchema 对象。
  * @param json JSON 数据
  * @returns JSONSchema 对象
  */
@@ -300,8 +298,7 @@ export function jsonToJsonSchema(
 }
 
 /**
- * 获得 mockjs 模板的 JSONSchema 对象。
- *
+ * @description 获得 mockjs 模板的 JSONSchema 对象。
  * @param template mockjs 模板
  * @returns JSONSchema 对象
  */
@@ -349,8 +346,7 @@ export function mockjsTemplateToJsonSchema(
 }
 
 /**
- * 获得属性定义列表的 JSONSchema 对象。
- *
+ * @description 获得属性定义列表的 JSONSchema 对象。
  * @param propDefinitions 属性定义列表
  * @returns JSONSchema 对象
  */
@@ -396,8 +392,7 @@ const JSTTOptions: Partial<Options> = {
 }
 
 /**
- * 根据 JSONSchema 对象生产 TypeScript 类型定义。
- *
+ * @description 根据 JSONSchema 对象生产 TypeScript 类型定义。
  * @param jsonSchema JSONSchema 对象
  * @param typeName 类型名称
  * @returns TypeScript 类型定义
@@ -416,7 +411,7 @@ export async function jsonSchemaToType(
   // JSTT 会转换 typeName，因此传入一个全大写的假 typeName，生成代码后再替换回真正的 typeName
   const fakeTypeName = 'THISISAFAKETYPENAME'
   const code = await compile(
-    jsonSchemaToJSTTJsonSchema(cloneDeepFast(jsonSchema), typeName),
+    jsonSchemaToJSTTJsonSchema(cloneDeep(jsonSchema), typeName),
     fakeTypeName,
     JSTTOptions,
   )
@@ -523,6 +518,13 @@ export function getRequestDataJsonSchema(
   return jsonSchema || {}
 }
 
+/**
+ * @description 获得响应数据 JSONSchema 对象。
+ * @param interfaceInfo 接口信息
+ * @param customTypeMapping 自定义类型映射
+ * @param dataKey 数据键
+ * @returns 响应数据 JSONSchema 对象
+ */
 export function getResponseDataJsonSchema(
   interfaceInfo: Interface,
   customTypeMapping: Record<string, JSONSchema4TypeName>,
@@ -556,6 +558,12 @@ export function getResponseDataJsonSchema(
   return jsonSchema
 }
 
+/**
+ * @description 获取 JSONSchema 对象的指定路径。
+ * @param jsonSchema JSONSchema 对象
+ * @param path 路径
+ * @returns 指定路径的 JSONSchema 对象
+ */
 export function reachJsonSchema(
   jsonSchema: JSONSchema4,
   path: OneOrMore<string>,
@@ -571,6 +579,11 @@ export function reachJsonSchema(
   return last
 }
 
+/**
+ * @description 根据权重排序。
+ * @param list 列表
+ * @returns 排序后的列表
+ */
 export function sortByWeights<T extends { weights: number[] }>(list: T[]): T[] {
   list.sort((a, b) => {
     const x = a.weights.length > b.weights.length ? b : a
@@ -588,16 +601,31 @@ export function sortByWeights<T extends { weights: number[] }>(list: T[]): T[] {
   return list
 }
 
+/**
+ * @description 判断是否为 GET 类请求。
+ * @param method 请求方式
+ * @returns 是否为 GET 类请求
+ */
 export function isGetLikeMethod(method: Method): boolean {
   return (
     method === Method.GET || method === Method.OPTIONS || method === Method.HEAD
   )
 }
 
+/**
+ * @description 判断是否为 POST 类请求。
+ * @param method 请求方式
+ * @returns 是否为 POST 类请求
+ */
 export function isPostLikeMethod(method: Method): boolean {
   return !isGetLikeMethod(method)
 }
 
+/**
+ * @description 获取 prettier 配置。
+ * @param cwd 当前工作目录
+ * @returns prettier 配置
+ */
 export async function getPrettier(cwd: string): Promise<typeof prettier> {
   const projectPrettierPath = path.join(cwd, 'node_modules/prettier')
   if (await fs.pathExists(projectPrettierPath)) {
@@ -606,6 +634,10 @@ export async function getPrettier(cwd: string): Promise<typeof prettier> {
   return require('prettier')
 }
 
+/**
+ * @description 获取 prettier 配置。
+ * @returns prettier 配置
+ */
 export async function getPrettierOptions(): Promise<prettier.Options> {
   const prettierOptions: prettier.Options = {
     parser: 'typescript',
@@ -623,16 +655,18 @@ export async function getPrettierOptions(): Promise<prettier.Options> {
     return prettierOptions
   }
 
-  const [prettierConfigPathErr, prettierConfigPath] = await run(() =>
-    prettier.resolveConfigFile(),
-  )
+  const [prettierConfigPathErr, prettierConfigPath] = await (() => {
+    const [err, path] = prettier.resolveConfigFile()
+    return [err, path]
+  })()
   if (prettierConfigPathErr || !prettierConfigPath) {
     return prettierOptions
   }
 
-  const [prettierConfigErr, prettierConfig] = await run(() =>
-    prettier.resolveConfig(prettierConfigPath),
-  )
+  const [prettierConfigErr, prettierConfig] = await (() => {
+    const [err, config] = prettier.resolveConfig(prettierConfigPath)
+    return [err, config]
+  })()
   if (prettierConfigErr || !prettierConfig) {
     return prettierOptions
   }
@@ -644,8 +678,18 @@ export async function getPrettierOptions(): Promise<prettier.Options> {
   }
 }
 
+/**
+ * @description 获取缓存的 prettier 配置。
+ * @returns prettier 配置
+ */
 export const getCachedPrettierOptions = memoize(getPrettierOptions)
 
+/**
+ * @description 获取 HTTP 请求。
+ * @param url 请求 URL
+ * @param query 请求参数
+ * @returns 请求结果
+ */
 export async function httpGet<T>(
   url: string,
   query?: Record<string, any>,

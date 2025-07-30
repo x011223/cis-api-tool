@@ -2,20 +2,18 @@ import * as changeCase from 'change-case'
 import dayjs from 'dayjs'
 import fs from 'fs-extra'
 import path from 'path'
-import {
-  castArray,
-  cloneDeepFast,
-  dedent,
-  groupBy,
-  isEmpty,
-  isFunction,
-  last,
-  memoize,
-  noop,
-  omit,
-  uniq,
-  values,
-} from 'vtils'
+import castArray from 'lodash/castArray'
+import cloneDeep from 'lodash/cloneDeep'
+import { dedent } from './vutils/function'
+import groupBy from 'lodash/groupBy'
+import isEmpty from 'lodash/isEmpty'
+import isFunction from 'lodash/isFunction'
+import last from 'lodash/last'
+import memoize from 'lodash/memoize'
+import noop from 'lodash/noop'
+import omit from 'lodash/omit'
+import uniq from 'lodash/uniq'
+import values from 'lodash/values'
 import {
   CategoryList,
   CommentConfig,
@@ -181,18 +179,19 @@ export class Generator {
                         interfaceList = interfaceList
                           .map(interfaceInfo => {
                             // 实现 _project 字段
-                            interfaceInfo._project = omit(projectInfo, 
+                            interfaceInfo._project = omit(
+                              projectInfo,
                               'cats',
                               // 'getMockUrl',
                               'getDevUrl',
-                              'getProdUrl'
+                              'getProdUrl',
                             )
                             // 预处理
                             const _interfaceInfo = isFunction(
                               syntheticalConfig.preproccessInterface,
                             )
                               ? syntheticalConfig.preproccessInterface?.(
-                                  cloneDeepFast(interfaceInfo),
+                                  cloneDeep(interfaceInfo),
                                   changeCase,
                                   syntheticalConfig,
                                 )
@@ -251,12 +250,9 @@ export class Generator {
                           outputFilePath => {
                             const categoryCode = [
                               ...uniq(
-                                sortByWeights(
-                                  groupedInterfaceCodes[outputFilePath].map(item => ({
-                                    weights: item.weights,
-                                    categoryUID: item.categoryUID
-                                  })),
-                                ).map(item => item.categoryUID),
+                                groupedInterfaceCodes[outputFilePath].map(
+                                  item => item.categoryUID,
+                                ),
                               ).map(categoryUID =>
                                 syntheticalConfig.typesOnly
                                   ? ''
@@ -275,12 +271,9 @@ export class Generator {
                                     )} as any
                                     `,
                               ),
-                              ...sortByWeights(
-                                groupedInterfaceCodes[outputFilePath].map(item => ({
-                                  weights: item.weights,
-                                  code: item.code
-                                })),
-                              ).map(item => item.code),
+                              ...groupedInterfaceCodes[outputFilePath].map(
+                                item => item.code,
+                              ),
                             ]
                               .filter(Boolean)
                               .join('\n\n')
@@ -594,52 +587,48 @@ export class Generator {
     return res.data || res
   }
 
-  fetchProject = memoize(
-    async ({ serverUrl, token }: SyntheticalConfig) => {
-      const projectInfo = await this.fetchApi<Project>(
-        `${serverUrl}/api/project/get`,
-        {
-          token: token!,
-        },
-      )
-      const basePath = `/${projectInfo.basepath || '/'}`
-        .replace(/\/+$/, '')
-        .replace(/^\/+/, '/')
-      projectInfo.basepath = basePath
-      // 实现项目在 YApi 上的地址
-      projectInfo._url = `${serverUrl}/project/${projectInfo._id}/interface/api`
-      return projectInfo
-    },
-  )
+  fetchProject = memoize(async ({ serverUrl, token }: SyntheticalConfig) => {
+    const projectInfo = await this.fetchApi<Project>(
+      `${serverUrl}/api/project/get`,
+      {
+        token: token!,
+      },
+    )
+    const basePath = `/${projectInfo.basepath || '/'}`
+      .replace(/\/+$/, '')
+      .replace(/^\/+/, '/')
+    projectInfo.basepath = basePath
+    // 实现项目在 YApi 上的地址
+    projectInfo._url = `${serverUrl}/project/${projectInfo._id}/interface/api`
+    return projectInfo
+  })
 
-  fetchExport = memoize(
-    async ({ serverUrl, token }: SyntheticalConfig) => {
-      const projectInfo = await this.fetchProject({ serverUrl, token })
-      const categoryList = await this.fetchApi<CategoryList>(
-        `${serverUrl}/api/plugin/export`,
-        {
-          type: 'json',
-          status: 'all',
-          isWiki: 'false',
-          token: token!,
-        },
-      )
-      return categoryList.map(cat => {
-        const projectId = cat.list?.[0]?.project_id || 0
-        const catId = cat.list?.[0]?.catid || 0
-        // 实现分类在 YApi 上的地址
-        cat._url = `${serverUrl}/project/${projectId}/interface/api/cat_${catId}`
-        cat.list = (cat.list || []).map(item => {
-          const interfaceId = item._id
-          // 实现接口在 YApi 上的地址
-          item._url = `${serverUrl}/project/${projectId}/interface/api/${interfaceId}`
-          item.path = `${projectInfo.basepath}${item.path}`
-          return item
-        })
-        return cat
+  fetchExport = memoize(async ({ serverUrl, token }: SyntheticalConfig) => {
+    const projectInfo = await this.fetchProject({ serverUrl, token })
+    const categoryList = await this.fetchApi<CategoryList>(
+      `${serverUrl}/api/plugin/export`,
+      {
+        type: 'json',
+        status: 'all',
+        isWiki: 'false',
+        token: token!,
+      },
+    )
+    return categoryList.map(cat => {
+      const projectId = cat.list?.[0]?.project_id || 0
+      const catId = cat.list?.[0]?.catid || 0
+      // 实现分类在 YApi 上的地址
+      cat._url = `${serverUrl}/project/${projectId}/interface/api/cat_${catId}`
+      cat.list = (cat.list || []).map(item => {
+        const interfaceId = item._id
+        // 实现接口在 YApi 上的地址
+        item._url = `${serverUrl}/project/${projectId}/interface/api/${interfaceId}`
+        item.path = `${projectInfo.basepath}${item.path}`
+        return item
       })
-    },
-  )
+      return cat
+    })
+  })
 
   /** 获取分类的接口列表 */
   async fetchInterfaceList({
@@ -650,7 +639,8 @@ export class Generator {
     const category = (
       (await this.fetchExport({ serverUrl, token })) || []
     ).find(
-      (cat: any) => !isEmpty(cat) && !isEmpty(cat.list) && cat.list[0].catid === id,
+      (cat: any) =>
+        !isEmpty(cat) && !isEmpty(cat.list) && cat.list[0].catid === id,
     )
 
     if (category) {
@@ -859,7 +849,7 @@ export class Generator {
       const extraComment: string = summary
         .filter(item => typeof item !== 'boolean' && !isEmpty(item.value))
         .map(item => {
-          const _item: Exclude<typeof summary[0], boolean> = item as any
+          const _item: Exclude<(typeof summary)[0], boolean> = item as any
           return `* @${_item.label} ${castArray(_item.value).join(', ')}`
         })
         .join('\n')
@@ -971,7 +961,7 @@ export class Generator {
                 ? ''
                 : dedent`
                   ${genComment(title => `接口 ${title} 的 **React Hook**`)}
-                  export const ${requestHookName} = ${COMPRESSOR_TREE_SHAKING_ANNOTATION} makeRequestHook<${requestDataTypeName}, ${requestConfigTypeName}, ReturnType<typeof ${requestFunctionName}>>(${requestFunctionName} as any)
+                  export const ${requestHookName || ''} = ${COMPRESSOR_TREE_SHAKING_ANNOTATION} makeRequestHook<${requestDataTypeName}, ${requestConfigTypeName}, ReturnType<typeof ${requestFunctionName}>>(${requestFunctionName} as any)
                 `
             }
           `
