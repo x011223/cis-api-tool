@@ -1,5 +1,5 @@
 {
-  "name": "@sz-cis/api-tool",
+  "name": "cis-api-tool",
   "version": "0.0.6",
   "description": "根据 YApi 的接口定义生成 TypeScript/JavaScript 的接口类型及其请求函数代码。",
   "keywords": [
