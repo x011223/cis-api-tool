@@ -668,8 +668,8 @@ export async function getPrettierOptions(): Promise<prettier.Options> {
     return prettierOptions
   }
 
-  const [prettierConfigErr, prettierConfig] = await (() => {
-    const [err, config] = prettier.resolveConfig(prettierConfigPath)
+  const [prettierConfigErr, prettierConfig] = await (async() => {
+    const [err, config] = await prettier.resolveConfig(prettierConfigPath)
     return [err, config]
   })()
   if (prettierConfigErr || !prettierConfig) {

@@ -24,20 +24,20 @@
   },
   "sideEffects": false,
   "main": "lib/cjs/index.js",
-  "module": "lib/esm/index.js",
-  "types": "lib/esm/index.d.ts",
+  "module": "lib/esm/index.mjs",
+  "types": "lib/esm/index.d.mts",
   "bin": {
-    "ytt": "lib/cjs/cli.js"
+    "apiPower": "lib/cjs/cli.js"
   },
   "files": [
     "lib"
   ],
   "scripts": {
-    "build": "haoma compile",
+    "build": "tsdown",
     "docs": "npm run docs:build && gh-pages --dist docs/dist --dest handbook",
     "docs:build": "dumi build",
     "docs:dev": "dumi dev",
-    "release": "pnpm testOnly && standard-version -a && pnpm build && pnpm docs && git push --follow-tags origin master && npm publish",
+    "release": "pnpm testOnly && standard-version -a && pnpm build && pnpm docs && git push --follow-tags origin main && pnpm publish",
     "releaseBeta": "pnpm testOnly && standard-version -a --release-as patch --prerelease beta && pnpm build && git push --follow-tags origin master && npm publish --tag next",
     "test": "jest --coverage",
     "testApi": "ts-node -T src/cli.ts",
@@ -88,6 +88,7 @@
     "@types/fs-extra": "^5.0.4",
     "@types/jest": "^30.0.0",
     "@types/json5": "^0.0.30",
+    "@types/lodash": "^4.17.20",
     "@types/node": "^10.12.10",
     "@types/node-fetch": "^2.6.2",
     "@types/prompts": "^1.2.0",
@@ -100,7 +101,7 @@
     "dumi": "^1.1.10",
     "eslint": "^7",
     "gh-pages": "^2.0.1",
-    "haoma": "^2.31.0",
+    "haoma": "^3.10.1",
     "husky": "^4",
     "jest": "^26",
     "lint-staged": "^10",
@@ -110,6 +111,7 @@
     "standard-version": "^9.3.2",
     "tempy": "^0.3.0",
     "ts-essentials": "^10.1.1",
+    "tsdown": "^0.13.1",
     "type-fest": "^4.41.0",
     "typedoc": "^0.14.2",
     "typescript-snapshots-plugin": "^1.7.0"

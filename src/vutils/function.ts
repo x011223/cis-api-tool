@@ -216,7 +216,7 @@ export function cloneArray<T>(a: T[], ignore?: (value: unknown) => boolean | und
   const keys = Object.keys(a)
   const a2 = new Array(keys.length)
   for (let i = 0; i < keys.length; i++) {
-    const k = keys[i]
+    const k: any = keys[i]
     const cur = a[k]
     if (typeof cur !== 'object' || cur === null || (ignore && ignore(cur))) {
       a2[k] = cur
