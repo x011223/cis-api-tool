@@ -3,6 +3,7 @@ import JSON5 from 'json5'
 import nodeFetch from 'node-fetch'
 import path from 'path'
 import prettier from 'prettier'
+import consola from 'consola'
 import ProxyAgent from 'proxy-agent'
 import toJsonSchema from 'to-json-schema'
 import castArray from 'lodash/castArray'
@@ -18,6 +19,7 @@ import { compile, Options } from 'json-schema-to-typescript'
 import { Defined, OneOrMore } from './vutils/type'
 import { FileData } from './helpers'
 import {
+  ExtendedInterface,
   Interface,
   Method,
   PropDefinition,
@@ -29,6 +31,8 @@ import {
 } from './types'
 import { JSONSchema4, JSONSchema4TypeName } from 'json-schema'
 import { URL } from 'url'
+import { ChangeCase } from './types'
+import { Consola } from 'consola'
 
 /**
  * @description 抛出错误。
@@ -655,8 +659,9 @@ export async function getPrettierOptions(): Promise<prettier.Options> {
     return prettierOptions
   }
 
-  const [prettierConfigPathErr, prettierConfigPath] = await (() => {
-    const [err, path] = prettier.resolveConfigFile()
+  const [prettierConfigPathErr, prettierConfigPath] = await (async() => {
+    const [err, path] = await prettier.resolveConfigFile()
+    consola.debug('获取 prettier 配置路径', path)
     return [err, path]
   })()
   if (prettierConfigPathErr || !prettierConfigPath) {
@@ -708,4 +713,109 @@ export async function httpGet<T>(
   })
 
   return res.json()
+}
+
+/**
+ * @description 生成请求函数名称
+ * @param interfaceInfo 接口信息
+ * @param changeCase 大小写转换函数
+ * @returns 请求函数名称
+ */
+export function getRequestFunctionName(
+  interfaceInfo: ExtendedInterface,
+  changeCase: ChangeCase,
+): string {
+  // /api/customer/v1/region/listDwg
+  // 返回 getCustomerV1RegionListDwgApi
+  // /api/system/v1/menu/query/{menuId}`
+  // 返回 getSystemV1MenuQueryByMenuIdApi
+  
+  // 获取请求方法前缀
+  const methodPrefix = interfaceInfo.method.toLowerCase() === 'get' ? 'get' : 'post';
+  
+  // 处理路径
+  let path = interfaceInfo.path;
+  
+  // 移除开头的斜杠和api前缀
+  path = path.replace(/^\/+/, '').replace(/^api\/+/, '');
+  
+  // 将路径参数 {xxx} 转换为 ByXxx 格式
+  path = path.replace(/\{([^}]+)\}/g, (_, param) => `By${changeCase.pascalCase(param)}`);
+  
+  // 将路径分段并转换为驼峰格式
+  const pathSegments = path.split('/').filter(Boolean);
+  const pathPart = pathSegments.map(segment => changeCase.pascalCase(segment)).join('');
+  
+  // 组合最终的函数名
+  return `${methodPrefix}${pathPart}Api`;
+}
+
+/**
+ * @description 生成请求数据类型名称
+ * @param interfaceInfo 接口信息
+ * @param changeCase 大小写转换函数
+ * @returns 请求数据类型名称
+ */
+export function getRequestDataTypeName(
+  interfaceInfo: ExtendedInterface,
+  changeCase: ChangeCase,
+): string {
+  // /api/customer/v1/region/listDwg
+  // 返回 GetCustomerV1RegionListDwgRequestType
+  // /api/system/v1/menu/query/{menuId}`
+  // 返回 GetSystemV1MenuQueryByMenuIdRequestType
+  
+  // 获取请求方法前缀
+  const methodPrefix = interfaceInfo.method.toLowerCase() === 'get' ? 'Get' : 'Post';
+  
+  // 处理路径
+  let path = interfaceInfo.path;
+  
+  // 移除开头的斜杠和api前缀
+  path = path.replace(/^\/+/, '').replace(/^api\/+/, '');
+  
+  // 将路径参数 {xxx} 转换为 ByXxx 格式
+  path = path.replace(/\{([^}]+)\}/g, (_, param) => `By${changeCase.pascalCase(param)}`);
+  
+  // 将路径分段并转换为驼峰格式
+  const pathSegments = path.split('/').filter(Boolean);
+  const pathPart = pathSegments.map(segment => changeCase.pascalCase(segment)).join('');
+  
+  // 组合最终的类型名
+  return `${methodPrefix}${pathPart}RequestType`;
+}
+
+/**
+ * @description 生成响应数据类型名称
+ * @param interfaceInfo 接口信息
+ * @param changeCase 大小写转换函数
+ * @returns 响应数据类型名称
+ */
+export function getReponseDataTypeName(
+  interfaceInfo: ExtendedInterface,
+  changeCase: ChangeCase,
+): string {
+  // /api/customer/v1/region/listDwg
+  // 返回 GetCustomerV1RegionListDwgResponseType
+  // /api/system/v1/menu/query/{menuId}`
+  // 返回 GetSystemV1MenuQueryByMenuIdResponseType
+  
+  // 获取请求方法前缀
+  const methodPrefix = interfaceInfo.method.toLowerCase() === 'get' ? 'Get' : 'Post';
+  
+  // 处理路径
+  let path = interfaceInfo.path;
+  
+  // 移除开头的斜杠和api前缀
+  path = path.replace(/^\/+/, '').replace(/^api\/+/, '');
+  
+  // 将路径参数 {xxx} 转换为 ByXxx 格式
+  path = path.replace(/\{([^}]+)\}/g, (_, param) => `By${changeCase.pascalCase(param)}`);
+  
+  // 将路径分段并转换为驼峰格式
+  const pathSegments = path.split('/').filter(Boolean);
+  const pathPart = pathSegments.map(segment => changeCase.pascalCase(segment)).join('');
+  
+  // 组合最终的类型名
+  return `${methodPrefix}${pathPart}ResponseType`;
 }

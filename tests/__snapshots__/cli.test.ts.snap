@@ -140,7 +140,7 @@ exports[`cli 正确初始化配置文件 & 生成结果: 接口文件 1`] = `
 /* tslint:disable */
 /* eslint-disable */
 
-/* 该文件由 yapi-to-typescript 自动生成，请勿直接修改！！！ */
+/* 该文件由 cis-api-tool 自动生成，请勿直接修改！！！ */
 
 // @ts-ignore
 // prettier-ignore

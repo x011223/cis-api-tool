@@ -13,3 +13,4 @@ package-lock.json
 .umi*
 docs/dist
 dist
+src/service/*

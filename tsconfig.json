@@ -2,7 +2,7 @@
   "compilerOptions": {
     "strict": true,
     "noImplicitAny": false,
-    "target": "ES5",
+    "target": "ESNext",
     "module": "CommonJS",
     "moduleResolution": "node",
     "declaration": true,
@@ -15,7 +15,7 @@
     "jsx": "preserve",
     "lib": ["ESNext", "DOM"],
     "paths": {
-      "yapi-to-typescript": ["./src/index.ts"]
+      "cis-api-tool": ["./src/index.ts"]
     },
     "outDir": "./dist",
     "plugins": [

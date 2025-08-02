@@ -2,10 +2,9 @@ import fs from 'fs-extra'
 import path from 'path'
 import tempy from 'tempy'
 import { CatId } from './consts'
-import { forOwn } from 'vtils'
+import { forOwn } from 'lodash'
 import { Generator } from '../src/Generator'
-import { OneOrMore } from 'vtils/types'
-import { ServerConfig } from '../src'
+import { ServerConfig, OneOrMore } from '../src'
 
 afterEach(() => {
   require('node-fetch').resetExportCount()

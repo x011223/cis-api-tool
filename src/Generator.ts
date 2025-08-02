@@ -31,10 +31,13 @@ import {
 } from './types'
 import { exec } from 'child_process'
 import {
+  getRequestFunctionName,
   getCachedPrettierOptions,
   getNormalizedRelativePath,
   getPrettier,
+  getReponseDataTypeName,
   getRequestDataJsonSchema,
+  getRequestDataTypeName,
   getResponseDataJsonSchema,
   httpGet,
   jsonSchemaToType,
@@ -161,7 +164,7 @@ export class Generator {
                           ...serverConfig,
                           ...projectConfig,
                           ...categoryConfig,
-                          // mockUrl: projectInfo.getMockUrl(),
+                          mockUrl: projectInfo.getMockUrl(),
                         }
                         syntheticalConfig.target =
                           syntheticalConfig.target || 'typescript'
@@ -182,7 +185,7 @@ export class Generator {
                             interfaceInfo._project = omit(
                               projectInfo,
                               'cats',
-                              // 'getMockUrl',
+                              'getMockUrl',
                               'getDevUrl',
                               'getProdUrl',
                             )
@@ -373,7 +376,7 @@ export class Generator {
             await fs.outputFile(
               requestFunctionFilePath,
               dedent`
-                import type { RequestFunctionParams } from 'yapi-to-typescript'
+                import type { RequestFunctionParams } from 'cis-api-tool'
 
                 export interface RequestOptions {
                   /**
@@ -420,7 +423,7 @@ export class Generator {
               requestHookMakerFilePath,
               dedent`
                 import { useState, useEffect } from 'react'
-                import type { RequestConfig } from 'yapi-to-typescript'
+                import type { RequestConfig } from 'cis-api-tool'
                 import type { Request } from ${JSON.stringify(
                   getNormalizedRelativePath(
                     requestHookMakerFilePath,
@@ -467,7 +470,7 @@ export class Generator {
           /* tslint:disable */
           /* eslint-disable */
 
-          /* 该文件由 yapi-to-typescript 自动生成，请勿直接修改！！！ */
+          /* 该文件由 cis-api-tool 自动生成，请勿直接修改！！！ */
 
           ${
             syntheticalConfig.typesOnly
@@ -480,10 +483,10 @@ export class Generator {
               : dedent`
                 // @ts-ignore
                 // prettier-ignore
-                import { QueryStringArrayFormat, Method, RequestBodyType, ResponseBodyType, FileData, prepare } from 'yapi-to-typescript'
+                import { QueryStringArrayFormat, Method, RequestBodyType, ResponseBodyType, FileData, prepare } from 'cis-api-tool'
                 // @ts-ignore
                 // prettier-ignore
-                import type { RequestConfig, RequestFunctionRestArgs } from 'yapi-to-typescript'
+                import type { RequestConfig, RequestFunctionRestArgs } from 'cis-api-tool'
                 // @ts-ignore
                 import request from ${JSON.stringify(
                   getNormalizedRelativePath(
@@ -666,8 +669,8 @@ export class Generator {
     return {
       ...projectInfo,
       cats: projectCats,
-      // getMockUrl: () =>
-      //   `${syntheticalConfig.serverUrl}/mock/${projectInfo._id}`,
+      getMockUrl: () =>
+        `${syntheticalConfig.serverUrl}/mock/${projectInfo._id}`,
       getDevUrl: (devEnvName: string) => {
         const env = projectInfo.env.find((e: any) => e.name === devEnvName)
         return (env && env.domain) /* istanbul ignore next */ || ''
@@ -696,7 +699,7 @@ export class Generator {
           extendedInterfaceInfo,
           changeCase,
         )
-      : changeCase.camelCase(extendedInterfaceInfo.parsedPath.name)
+      : getRequestFunctionName(extendedInterfaceInfo, changeCase)
     const requestConfigName = changeCase.camelCase(
       `${requestFunctionName}RequestConfig`,
     )
@@ -708,7 +711,7 @@ export class Generator {
           extendedInterfaceInfo,
           changeCase,
         )
-      : changeCase.pascalCase(`${requestFunctionName}Request`)
+      : getRequestDataTypeName(extendedInterfaceInfo, changeCase)
     const responseDataTypeName = isFunction(
       syntheticalConfig.getResponseDataTypeName,
     )
@@ -716,14 +719,14 @@ export class Generator {
           extendedInterfaceInfo,
           changeCase,
         )
-      : changeCase.pascalCase(`${requestFunctionName}Response`)
+      : getReponseDataTypeName(extendedInterfaceInfo, changeCase)
     const requestDataJsonSchema = getRequestDataJsonSchema(
       extendedInterfaceInfo,
       syntheticalConfig.customTypeMapping || {},
     )
     const requestDataType = await jsonSchemaToType(
       requestDataJsonSchema,
-      requestDataTypeName,
+      requestDataTypeName!,
     )
     const responseDataJsonSchema = getResponseDataJsonSchema(
       extendedInterfaceInfo,
@@ -732,7 +735,7 @@ export class Generator {
     )
     const responseDataType = await jsonSchemaToType(
       responseDataJsonSchema,
-      responseDataTypeName,
+      responseDataTypeName!,
     )
     const isRequestDataOptional = /(\{\}|any)$/g.test(requestDataType)
     const requestHookName =
@@ -870,17 +873,17 @@ export class Generator {
         : {}
 
     return dedent`
-      ${genComment(title => `接口 ${title} 的 **请求类型**`)}
+      ${genComment(title => `@description 接口 ${title} 的 **请求类型**`)}
       ${requestDataType.trim()}
 
-      ${genComment(title => `接口 ${title} 的 **返回类型**`)}
+      ${genComment(title => `@description 接口 ${title} 的 **返回类型**`)}
       ${responseDataType.trim()}
 
       ${
         syntheticalConfig.typesOnly
           ? ''
           : dedent`
-            ${genComment(title => `接口 ${title} 的 **请求配置的类型**`)}
+            ${genComment(title => `@description 接口 ${title} 的 **请求配置的类型**`)}
             type ${requestConfigTypeName} = Readonly<RequestConfig<
               ${JSON.stringify(syntheticalConfig.mockUrl)},
               ${JSON.stringify(syntheticalConfig.devUrl)},
@@ -892,7 +895,7 @@ export class Generator {
               ${JSON.stringify(isRequestDataOptional)}
             >>
 
-            ${genComment(title => `接口 ${title} 的 **请求配置**`)}
+            ${genComment(title => `@description 接口 ${title} 的 **请求配置**`)}
             const ${requestConfigName}: ${requestConfigTypeName} = ${COMPRESSOR_TREE_SHAKING_ANNOTATION} {
               mockUrl: mockUrl${categoryUID},
               devUrl: devUrl${categoryUID},
@@ -940,28 +943,28 @@ export class Generator {
               extraInfo: ${JSON.stringify(requestFunctionExtraInfo)},
             }
 
-            ${genComment(title => `接口 ${title} 的 **请求函数**`)}
-            export const ${requestFunctionName} = ${COMPRESSOR_TREE_SHAKING_ANNOTATION} (
+            ${genComment(title => `@description 接口 ${title} 的 **请求函数**`)}
+            export const ${requestFunctionName || 'ErrorRequestFunctionName'} = ${COMPRESSOR_TREE_SHAKING_ANNOTATION} (
               requestData${
                 isRequestDataOptional ? '?' : ''
-              }: ${requestDataTypeName},
+              }: ${requestDataTypeName!},
               ...args: UserRequestRestArgs
             ) => {
-              return request<${responseDataTypeName}>(
+              return request<${responseDataTypeName!}>(
                 prepare(${requestConfigName}, requestData),
                 ...args,
               )
             }
 
-            ${requestFunctionName}.requestConfig = ${requestConfigName}
+            ${requestFunctionName || 'ErrorRequestFunctionName'}.requestConfig = ${requestConfigName}
 
             ${
               !syntheticalConfig.reactHooks ||
               !syntheticalConfig.reactHooks.enabled
                 ? ''
                 : dedent`
-                  ${genComment(title => `接口 ${title} 的 **React Hook**`)}
-                  export const ${requestHookName || ''} = ${COMPRESSOR_TREE_SHAKING_ANNOTATION} makeRequestHook<${requestDataTypeName}, ${requestConfigTypeName}, ReturnType<typeof ${requestFunctionName}>>(${requestFunctionName} as any)
+                  ${genComment(title => `@description 接口 ${title} 的 **React Hook**`)}
+                  export const ${requestHookName || 'ErrorRequestHookName'} = ${COMPRESSOR_TREE_SHAKING_ANNOTATION} makeRequestHook<${requestDataTypeName || 'ErrorRequestDataTypeName'}, ${requestConfigTypeName}, ReturnType<typeof ${requestFunctionName || 'ErrorRequestFunctionName'}>>(${requestFunctionName || 'ErrorRequestFunctionName'} as any)
                 `
             }
           `

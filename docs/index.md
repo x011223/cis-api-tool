@@ -28,27 +28,19 @@ order: 1
 
 ## 安装
 
-选择你常用的包管理器将 `yapi-to-typescript` 加入项目依赖即可：
+选择你常用的包管理器将 `cis-api-tool` 加入项目依赖即可：
 
 ```bash
 # npm
-npm i yapi-to-typescript
+npm i cis-api-tool
 
 # yarn
-yarn add yapi-to-typescript
+yarn add cis-api-tool
 
 # pnpm
-pnpm add yapi-to-typescript
+pnpm add cis-api-tool
 ```
-
-如果你在国内且没有任何科学<span style="font-size: 0;">习</span>上网措施，上述安装过程可能会非常慢，推荐你使用 [tbify](https://github.com/fjc0k/tbify)，这个工具可以自动将 npm、yarn 等包管理工具连上国内的淘宝镜像，加速安装。
-
-## 交流群
-
-钉钉扫码加入交流群：
-
-<img src="https://cdn.jsdelivr.net/gh/fjc0k/yapi-to-typescript@master/assets/dd.jpg" width="300" />
 
 ## 许可
 
-[MIT](https://github.com/x011223/cis-api-tool.git/blob/master/LICENSE) © [Jay Fong](https://github.com/fjc0k)
+[MIT](https://github.com/x011223/cis-api-tool.git/blob/master/LICENSE) © [x011223](https://github.com/x011223)

@@ -14,7 +14,7 @@ order: 4
 默认导出一个异步的请求函数即可：
 
 ```typescript
-import { RequestFunctionParams } from 'yapi-to-typescript'
+import { RequestFunctionParams } from 'cis-api-tool'
 
 export default async function request<TResponseData>(
   payload: RequestFunctionParams,
@@ -72,7 +72,7 @@ export default async function request<TResponseData>(
   实际请这样使用：
 
   ```typescript
-  import { Method } from 'yapi-to-typescript'
+  import { Method } from 'cis-api-tool'
 
   console.log(Method.GET, Method.POST)
   ```
@@ -100,7 +100,7 @@ export default async function request<TResponseData>(
   实际请这样使用：
 
   ```typescript
-  import { RequestBodyType } from 'yapi-to-typescript'
+  import { RequestBodyType } from 'cis-api-tool'
 
   console.log(RequestBodyType.form, RequestBodyType.json)
   ```
@@ -116,7 +116,7 @@ export default async function request<TResponseData>(
   实际请这样使用：
 
   ```typescript
-  import { ResponseBodyType } from 'yapi-to-typescript'
+  import { ResponseBodyType } from 'cis-api-tool'
 
   console.log(ResponseBodyType.text, ResponseBodyType.json)
   ```
@@ -208,7 +208,7 @@ export default async function request<TResponseData>(
 
 ```typescript
 import fetch from 'cross-fetch'
-import { RequestBodyType, RequestFunctionParams } from 'yapi-to-typescript'
+import { RequestBodyType, RequestFunctionParams } from 'cis-api-tool'
 
 export interface RequestOptions {
   /**

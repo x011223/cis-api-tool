@@ -8,15 +8,15 @@ order: 2
 首先，使用以下命令初始化配置文件：
 
 ```bash
-npx ytt init
+npx apiPower init
 ```
 
-然后，打开 `ytt.config.ts` 或 `ytt.config.js` 文件进行配置。
+然后，打开 `apiPower.config.ts` 或 `apiPower.config.js` 文件进行配置。
 
 你还可以自定义配置文件的路径：
 
 ```bash
-npx ytt init -c config/ytt.ts
+npx apiPower init -c config/apiPower.ts
 ```
 
 ## 公共配置
@@ -74,7 +74,7 @@ npx ytt init -c config/ytt.ts
 <Badge>3.22.0+</Badge> 你可以将之设置为函数实现类似接口分模块的需求：
 
 ```javascript
-import { defineConfig } from 'yapi-to-typescript'
+import { defineConfig } from 'cis-api-tool'
 
 export default defineConfig({
   outputFilePath: interfaceInfo => `src/api/${interfaceInfo._category.name}.ts`,
@@ -111,7 +111,7 @@ export default defineConfig({
 作为具体业务，我们只关心 `data` 字段内的数据（`code`、`msg` 已经由请求函数统一处理），此时，可将 `dataKey` 设为 `data`，如此，生成的接口响应数据类型就是 `data` 字段的类型，必须注意的是，请求函数内需自行根据 `payload.dataKey` 返回具体业务所需的内容，如：
 
 ```typescript
-import { RequestFunctionParams } from 'yapi-to-typescript'
+import { RequestFunctionParams } from 'cis-api-tool'
 
 export default async function request<TResponseData>(
   payload: RequestFunctionParams,
@@ -134,7 +134,7 @@ export default async function request<TResponseData>(
 <Badge>3.23.0+</Badge> 如果接口返回结果嵌套多层，你也可以将 `dataKey` 设为一个到达真正结果的路径数组，如：`['data', 'realData']`，相应地请求函数内也需要对数组的情况做处理：
 
 ```typescript
-import { RequestFunctionParams } from 'yapi-to-typescript'
+import { RequestFunctionParams } from 'cis-api-tool'
 import { get } from 'lodash'
 
 export default async function request<TResponseData>(
@@ -291,7 +291,7 @@ export default async function request<TResponseData>(
 额外的注释标签。生成的内容形如：`@{name} {value}`。举例：
 
 ```javascript
-import { defineConfig } from 'yapi-to-typescript'
+import { defineConfig } from 'cis-api-tool'
 
 export default defineConfig({
   comment: {
@@ -355,7 +355,7 @@ ytt 内置了一个映射表，此配置会进行追加（相同覆盖）：
 用法：
 
 ```typescript
-import { QueryStringArrayFormat } from 'yapi-to-typescript'
+import { QueryStringArrayFormat } from 'cis-api-tool'
 
 export default defineConfig({
   queryStringArrayFormat: QueryStringArrayFormat.brackets,
@@ -373,7 +373,7 @@ export default defineConfig({
 - 应用场景：请求函数需获得接口相关信息以在出错时提示友好
 
   ```javascript
-  import { defineConfig } from 'yapi-to-typescript'
+  import { defineConfig } from 'cis-api-tool'
 
   export default defineConfig({
     setRequestFunctionExtraInfo(ii) {
@@ -401,7 +401,7 @@ export default defineConfig({
 - 应用场景 1：批量替换接口路径中的 v1 为 v2
 
   ```javascript
-  import { defineConfig } from 'yapi-to-typescript'
+  import { defineConfig } from 'cis-api-tool'
 
   export default defineConfig({
     preproccessInterface(interfaceInfo) {
@@ -414,7 +414,7 @@ export default defineConfig({
 - 应用场景 2：排除分类名称含「前台」的所有接口
 
   ```javascript
-  import { defineConfig } from 'yapi-to-typescript'
+  import { defineConfig } from 'cis-api-tool'
 
   export default defineConfig({
     preproccessInterface(interfaceInfo) {

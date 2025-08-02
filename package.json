@@ -1,11 +1,12 @@
 {
   "name": "@cis/api-tool",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "根据 YApi 的接口定义生成 TypeScript/JavaScript 的接口类型及其请求函数代码。",
   "keywords": [
     "yapi",
     "codegen",
-    "typescript"
+    "typescript",
+    "swagger"
   ],
   "homepage": "https://github.com/x011223/cis-api-tool.git",
   "bugs": {
@@ -13,13 +14,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:fjc0k/yapi-to-typescript.git"
+    "url": "git@github.com:x011223/cis-api-tool.git"
   },
   "license": "MIT",
   "author": {
     "name": "Jay Fong",
     "email": "fjc0kb@gmail.com",
-    "url": "https://github.com/fjc0k"
+    "url": "https://github.com/x011223"
   },
   "sideEffects": false,
   "main": "lib/cjs/index.js",
@@ -36,8 +37,8 @@
     "docs": "npm run docs:build && gh-pages --dist docs/dist --dest handbook",
     "docs:build": "dumi build",
     "docs:dev": "dumi dev",
-    "release": "yarn testOnly && standard-version -a && yarn build && yarn docs && git push --follow-tags origin master && npm publish",
-    "releaseBeta": "yarn testOnly && standard-version -a --release-as patch --prerelease beta && yarn build && git push --follow-tags origin master && npm publish --tag next",
+    "release": "pnpm testOnly && standard-version -a && pnpm build && pnpm docs && git push --follow-tags origin master && npm publish",
+    "releaseBeta": "pnpm testOnly && standard-version -a --release-as patch --prerelease beta && pnpm build && git push --follow-tags origin master && npm publish --tag next",
     "test": "jest --coverage",
     "testApi": "ts-node -T src/cli.ts",
     "testOnly": "jest",
@@ -85,6 +86,7 @@
   },
   "devDependencies": {
     "@types/fs-extra": "^5.0.4",
+    "@types/jest": "^30.0.0",
     "@types/json5": "^0.0.30",
     "@types/node": "^10.12.10",
     "@types/node-fetch": "^2.6.2",

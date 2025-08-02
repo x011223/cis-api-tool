@@ -3356,7 +3356,7 @@ exports[`Generator 只生成类型代码并写入文件: 接口文件 1`] = `
 /* tslint:disable */
 /* eslint-disable */
 
-/* 该文件由 yapi-to-typescript 自动生成，请勿直接修改！！！ */
+/* 该文件由 cis-api-tool 自动生成，请勿直接修改！！！ */
 
 // @ts-ignore
 type FileData = File
@@ -4504,7 +4504,7 @@ exports[`Generator 只生成请求数据的 JSON Schema: 接口文件 1`] = `
 /* tslint:disable */
 /* eslint-disable */
 
-/* 该文件由 yapi-to-typescript 自动生成，请勿直接修改！！！ */
+/* 该文件由 cis-api-tool 自动生成，请勿直接修改！！！ */
 
 // @ts-ignore
 // prettier-ignore
@@ -8165,7 +8165,7 @@ exports[`Generator 只生成返回数据的 JSON Schema: 接口文件 1`] = `
 /* tslint:disable */
 /* eslint-disable */
 
-/* 该文件由 yapi-to-typescript 自动生成，请勿直接修改！！！ */
+/* 该文件由 cis-api-tool 自动生成，请勿直接修改！！！ */
 
 // @ts-ignore
 // prettier-ignore
@@ -12329,7 +12329,7 @@ exports[`Generator 排除接口: 接口文件 1`] = `
 /* tslint:disable */
 /* eslint-disable */
 
-/* 该文件由 yapi-to-typescript 自动生成，请勿直接修改！！！ */
+/* 该文件由 cis-api-tool 自动生成，请勿直接修改！！！ */
 
 // @ts-ignore
 // prettier-ignore
@@ -12546,7 +12546,7 @@ exports[`Generator 支持将 token 设为数组: 接口文件 1`] = `
 /* tslint:disable */
 /* eslint-disable */
 
-/* 该文件由 yapi-to-typescript 自动生成，请勿直接修改！！！ */
+/* 该文件由 cis-api-tool 自动生成，请勿直接修改！！！ */
 
 // @ts-ignore
 // prettier-ignore
@@ -19648,7 +19648,7 @@ exports[`Generator 支持项目设置里的接口基本路径: 接口文件 1`] 
 /* tslint:disable */
 /* eslint-disable */
 
-/* 该文件由 yapi-to-typescript 自动生成，请勿直接修改！！！ */
+/* 该文件由 cis-api-tool 自动生成，请勿直接修改！！！ */
 
 // @ts-ignore
 // prettier-ignore
@@ -23237,7 +23237,7 @@ exports[`Generator 无分类注释: 接口文件 1`] = `
 /* tslint:disable */
 /* eslint-disable */
 
-/* 该文件由 yapi-to-typescript 自动生成，请勿直接修改！！！ */
+/* 该文件由 cis-api-tool 自动生成，请勿直接修改！！！ */
 
 // @ts-ignore
 // prettier-ignore
@@ -26598,7 +26598,7 @@ exports[`Generator 无更新时间注释: 接口文件 1`] = `
 /* tslint:disable */
 /* eslint-disable */
 
-/* 该文件由 yapi-to-typescript 自动生成，请勿直接修改！！！ */
+/* 该文件由 cis-api-tool 自动生成，请勿直接修改！！！ */
 
 // @ts-ignore
 // prettier-ignore
@@ -29959,7 +29959,7 @@ exports[`Generator 无标签注释: 接口文件 1`] = `
 /* tslint:disable */
 /* eslint-disable */
 
-/* 该文件由 yapi-to-typescript 自动生成，请勿直接修改！！！ */
+/* 该文件由 cis-api-tool 自动生成，请勿直接修改！！！ */
 
 // @ts-ignore
 // prettier-ignore
@@ -33510,7 +33510,7 @@ exports[`Generator 无标题注释: 接口文件 1`] = `
 /* tslint:disable */
 /* eslint-disable */
 
-/* 该文件由 yapi-to-typescript 自动生成，请勿直接修改！！！ */
+/* 该文件由 cis-api-tool 自动生成，请勿直接修改！！！ */
 
 // @ts-ignore
 // prettier-ignore
@@ -36681,7 +36681,7 @@ exports[`Generator 无注释: 接口文件 1`] = `
 /* tslint:disable */
 /* eslint-disable */
 
-/* 该文件由 yapi-to-typescript 自动生成，请勿直接修改！！！ */
+/* 该文件由 cis-api-tool 自动生成，请勿直接修改！！！ */
 
 // @ts-ignore
 // prettier-ignore
@@ -38959,7 +38959,7 @@ exports[`Generator 无请求头注释: 接口文件 1`] = `
 /* tslint:disable */
 /* eslint-disable */
 
-/* 该文件由 yapi-to-typescript 自动生成，请勿直接修改！！！ */
+/* 该文件由 cis-api-tool 自动生成，请勿直接修改！！！ */
 
 // @ts-ignore
 // prettier-ignore
@@ -42320,7 +42320,7 @@ exports[`Generator 无链接注释: 接口文件 1`] = `
 /* tslint:disable */
 /* eslint-disable */
 
-/* 该文件由 yapi-to-typescript 自动生成，请勿直接修改！！！ */
+/* 该文件由 cis-api-tool 自动生成，请勿直接修改！！！ */
 
 // @ts-ignore
 // prettier-ignore
@@ -45871,7 +45871,7 @@ exports[`Generator 正确生成代码并写入文件 - 全部分类: 接口文�
 /* tslint:disable */
 /* eslint-disable */
 
-/* 该文件由 yapi-to-typescript 自动生成，请勿直接修改！！！ */
+/* 该文件由 cis-api-tool 自动生成，请勿直接修改！！！ */
 
 // @ts-ignore
 // prettier-ignore
@@ -51227,7 +51227,7 @@ exports[`Generator 正确生成代码并写入文件 - 单分类: 接口文件 1
 /* tslint:disable */
 /* eslint-disable */
 
-/* 该文件由 yapi-to-typescript 自动生成，请勿直接修改！！！ */
+/* 该文件由 cis-api-tool 自动生成，请勿直接修改！！！ */
 
 // @ts-ignore
 // prettier-ignore
@@ -54816,7 +54816,7 @@ exports[`Generator 正确生成代码并写入文件 - 多分类: 接口文件 1
 /* tslint:disable */
 /* eslint-disable */
 
-/* 该文件由 yapi-to-typescript 自动生成，请勿直接修改！！！ */
+/* 该文件由 cis-api-tool 自动生成，请勿直接修改！！！ */
 
 // @ts-ignore
 // prettier-ignore
@@ -59468,7 +59468,7 @@ exports[`Generator 正确生成代码并写入文件 - 排除分类: 接口文�
 /* tslint:disable */
 /* eslint-disable */
 
-/* 该文件由 yapi-to-typescript 自动生成，请勿直接修改！！！ */
+/* 该文件由 cis-api-tool 自动生成，请勿直接修改！！！ */
 
 // @ts-ignore
 // prettier-ignore
@@ -61310,7 +61310,7 @@ exports[`Generator 生成 JavaScript 代码: 接口文件 1`] = `
 "/* prettier-ignore-start */
 /* tslint:disable */
 /* eslint-disable */
-/* 该文件由 yapi-to-typescript 自动生成，请勿直接修改！！！ */
+/* 该文件由 cis-api-tool 自动生成，请勿直接修改！！！ */
 // @ts-ignore
 // prettier-ignore
 import { QueryStringArrayFormat, Method, RequestBodyType, ResponseBodyType, prepare } from 'yapi-to-typescript';
@@ -65114,7 +65114,7 @@ exports[`Generator 生成 React Hooks 代码: 接口文件 1`] = `
 /* tslint:disable */
 /* eslint-disable */
 
-/* 该文件由 yapi-to-typescript 自动生成，请勿直接修改！！！ */
+/* 该文件由 cis-api-tool 自动生成，请勿直接修改！！！ */
 
 // @ts-ignore
 // prettier-ignore
@@ -69123,7 +69123,7 @@ exports[`Generator 生成的 JSON Schema 应包含默认值: 接口文件 1`] = 
 /* tslint:disable */
 /* eslint-disable */
 
-/* 该文件由 yapi-to-typescript 自动生成，请勿直接修改！！！ */
+/* 该文件由 cis-api-tool 自动生成，请勿直接修改！！！ */
 
 // @ts-ignore
 // prettier-ignore
@@ -70319,7 +70319,7 @@ exports[`Generator 生成请求数据和返回数据的 JSON Schema: 接口文�
 /* tslint:disable */
 /* eslint-disable */
 
-/* 该文件由 yapi-to-typescript 自动生成，请勿直接修改！！！ */
+/* 该文件由 cis-api-tool 自动生成，请勿直接修改！！！ */
 
 // @ts-ignore
 // prettier-ignore

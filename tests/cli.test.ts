@@ -1,9 +1,10 @@
 import consola from 'consola'
 import fs from 'fs-extra'
 import path from 'path'
+import { uniqueId } from 'lodash'
 import { CatId } from './consts'
 import { run } from '../src/cli'
-import { uniqueId, wait } from 'vtils'
+import { wait } from '../src'
 
 const tempDir = path.join(__dirname, '../.tmp-ytt-test')
 

@@ -43,7 +43,7 @@ const updateUserInfo = async () => {
 对于上传文件类接口，你需要将文件包装为一个 FileData 实例，如：
 
 ```typescript
-import { FileData } from 'yapi-to-typescript'
+import { FileData } from 'cis-api-tool'
 import { uploadFile } from '../api'
 
 const changeAvatar = async (file: File) => {
@@ -91,7 +91,7 @@ type UserRole = GetUserInfoResponse['role']
 可使用钩子在生成成功、失败、完毕时进行相关操作。
 
 ```typescript
-import { defineConfig } from 'yapi-to-typescript'
+import { defineConfig } from 'cis-api-tool'
 
 export default defineConfig(
   {

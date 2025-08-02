@@ -27,9 +27,9 @@ TSNode.register({
     esModuleInterop: true,
     allowSyntheticDefaultImports: true,
     importHelpers: false,
-    // 转换 js，支持在 ytt.config.js 里使用最新语法
+    // 转换 js，支持在 apiPower.config.js 里使用最新语法
     allowJs: true,
-    lib: ['es2017'],
+    lib: ['ESNext'],
   },
 })
 
@@ -48,8 +48,8 @@ export async function run(
 
   if (!options?.configFile) {
     cwd = process.cwd()
-    configTSFile = path.join(cwd, 'ytt.config.ts')
-    configJSFile = path.join(cwd, 'ytt.config.js')
+    configTSFile = path.join(cwd, 'apiPower.config.ts')
+    configJSFile = path.join(cwd, 'apiPower.config.js')
     const configTSFileExist = await fs.pathExists(configTSFile)
     const configJSFileExist =
       !configTSFileExist && (await fs.pathExists(configJSFile))
@@ -66,9 +66,9 @@ export async function run(
     console.log(
       `\n${dedent`
         # 用法
-          初始化配置文件: ytt init
-          生成代码: ytt
-          查看帮助: ytt help
+          初始化配置文件: apiPower init
+          生成代码: apiPower
+          查看帮助: apiPower help
 
         # GitHub
           https://github.com/x011223/cis-api-tool.git
@@ -95,8 +95,8 @@ export async function run(
         name: 'configFileType',
         type: 'select',
         choices: [
-          { title: 'TypeScript(ytt.config.ts)', value: 'ts' },
-          { title: 'JavaScript(ytt.config.js)', value: 'js' },
+          { title: 'TypeScript(apiPower.config.ts)', value: 'ts' },
+          { title: 'JavaScript(apiPower.config.js)', value: 'js' },
         ],
       })
       outputConfigFile =
@@ -106,11 +106,12 @@ export async function run(
     await fs.outputFile(
       outputConfigFile,
       dedent`
-        import { defineConfig } from 'yapi-to-typescript'
+        import { defineConfig } from 'cis-api-tool'
 
         export default defineConfig([
           {
-            serverUrl: 'http://foo.bar',
+            serverUrl: 'http://github.com/x011223/cis-api-tool',
+            serverType: 'swagger',
             typesOnly: false,
             target: '${
               (outputConfigFileType === 'js'
@@ -130,16 +131,14 @@ export async function run(
                 categories: [
                   {
                     id: 0,
-                    getRequestFunctionName(interfaceInfo, changeCase) {
-                      // 以接口全路径生成请求函数名
-                      return changeCase.camelCase(interfaceInfo.path)
-
-                      // 若生成的请求函数名存在语法关键词报错、或想通过某个关键词触发 IDE 自动引入提示，可考虑加前缀，如:
-                      // return changeCase.camelCase(\`api_\${interfaceInfo.path}\`)
-
-                      // 若生成的请求函数名有重复报错，可考虑将接口请求方式纳入生成条件，如:
-                      // return changeCase.camelCase(\`\${interfaceInfo.method}_\${interfaceInfo.path}\`)
-                    },
+                    // getRequestFunctionName(interfaceInfo, changeCase) {
+                    //   以接口全路径生成请求函数名
+                    //   return changeCase.camelCase(interfaceInfo.path)
+                    //   若生成的请求函数名存在语法关键词报错、或想通过某个关键词触发 IDE 自动引入提示，可考虑加前缀，如:
+                    //   return changeCase.camelCase(\`api_\${interfaceInfo.path}\`)
+                    //   若生成的请求函数名有重复报错，可考虑将接口请求方式纳入生成条件，如:
+                    //   return changeCase.camelCase(\`\${interfaceInfo.method}_\${interfaceInfo.path}\`)
+                    // },
                   },
                 ],
               },
