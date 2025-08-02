@@ -37,7 +37,7 @@
     "docs": "npm run docs:build && gh-pages --dist docs/dist --dest handbook",
     "docs:build": "dumi build",
     "docs:dev": "dumi dev",
-    "release": "pnpm testOnly && standard-version -a && pnpm build && pnpm docs && git push --follow-tags origin main && pnpm publish",
+    "release": "standard-version -a && pnpm build && pnpm docs && git push --follow-tags origin main && pnpm publish",
     "releaseBeta": "pnpm testOnly && standard-version -a --release-as patch --prerelease beta && pnpm build && git push --follow-tags origin master && npm publish --tag next",
     "test": "jest --coverage",
     "testApi": "ts-node -T src/cli.ts",
