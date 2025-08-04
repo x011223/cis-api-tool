@@ -1,11 +1,8 @@
-import fs from 'fs-extra'
-import JSON5 from 'json5'
-import nodeFetch from 'node-fetch'
-import path from 'path'
-import prettier from 'prettier'
 import consola from 'consola'
-import ProxyAgent from 'proxy-agent'
-import toJsonSchema from 'to-json-schema'
+import fs from 'fs-extra'
+import { JSONSchema4, JSONSchema4TypeName } from 'json-schema'
+import { compile, Options } from 'json-schema-to-typescript'
+import JSON5 from 'json5'
 import castArray from 'lodash/castArray'
 import cloneDeep from 'lodash/cloneDeep'
 import forOwn from 'lodash/forOwn'
@@ -14,12 +11,16 @@ import isEmpty from 'lodash/isEmpty'
 import isObject from 'lodash/isObject'
 import mapKeys from 'lodash/mapKeys'
 import memoize from 'lodash/memoize'
-import pinyin from 'pinyin'
-import { traverse } from './vutils/function'
-import { compile, Options } from 'json-schema-to-typescript'
-import { Defined, OneOrMore } from './vutils/type'
+import nodeFetch from 'node-fetch'
+import path from 'path'
+import prettier from 'prettier'
+import ProxyAgent from 'proxy-agent'
+import TinyPinyin from 'tiny-pinyin'
+import toJsonSchema from 'to-json-schema'
+import { URL } from 'url'
 import { FileData } from './helpers'
 import {
+  ChangeCase,
   ExtendedInterface,
   Interface,
   Method,
@@ -30,10 +31,8 @@ import {
   Required,
   ResponseBodyType,
 } from './types'
-import { JSONSchema4, JSONSchema4TypeName } from 'json-schema'
-import { URL } from 'url'
-import { ChangeCase } from './types'
-import { Consola } from 'consola'
+import { traverse } from './vutils/function'
+import { Defined, OneOrMore } from './vutils/type'
 
 /**
  * @description 抛出错误。
@@ -660,7 +659,7 @@ export async function getPrettierOptions(): Promise<prettier.Options> {
     return prettierOptions
   }
 
-  const [prettierConfigPathErr, prettierConfigPath] = await (async() => {
+  const [prettierConfigPathErr, prettierConfigPath] = await (async () => {
     const [err, path] = await prettier.resolveConfigFile()
     consola.debug('获取 prettier 配置路径', path)
     return [err, path]
@@ -669,7 +668,7 @@ export async function getPrettierOptions(): Promise<prettier.Options> {
     return prettierOptions
   }
 
-  const [prettierConfigErr, prettierConfig] = await (async() => {
+  const [prettierConfigErr, prettierConfig] = await (async () => {
     const [err, config] = await prettier.resolveConfig(prettierConfigPath)
     return [err, config]
   })()
@@ -730,25 +729,31 @@ export function getRequestFunctionName(
   // 返回 getCustomerV1RegionListDwgApi
   // /api/system/v1/menu/query/{menuId}`
   // 返回 getSystemV1MenuQueryByMenuIdApi
-  
+
   // 获取请求方法前缀
-  const methodPrefix = interfaceInfo.method.toLowerCase() === 'get' ? 'get' : 'post';
-  
+  const methodPrefix =
+    interfaceInfo.method.toLowerCase() === 'get' ? 'get' : 'post'
+
   // 处理路径
-  let path = interfaceInfo.path;
-  
+  let path = interfaceInfo.path
+
   // 移除开头的斜杠和api前缀
-  path = path.replace(/^\/+/, '').replace(/^api\/+/, '');
-  
+  path = path.replace(/^\/+/, '').replace(/^api\/+/, '')
+
   // 将路径参数 {xxx} 转换为 ByXxx 格式
-  path = path.replace(/\{([^}]+)\}/g, (_, param) => `By${changeCase.pascalCase(param)}`);
-  
+  path = path.replace(
+    /\{([^}]+)\}/g,
+    (_, param) => `By${changeCase.pascalCase(param)}`,
+  )
+
   // 将路径分段并转换为驼峰格式
-  const pathSegments = path.split('/').filter(Boolean);
-  const pathPart = pathSegments.map(segment => changeCase.pascalCase(segment)).join('');
-  
+  const pathSegments = path.split('/').filter(Boolean)
+  const pathPart = pathSegments
+    .map(segment => changeCase.pascalCase(segment))
+    .join('')
+
   // 组合最终的函数名
-  return `${methodPrefix}${pathPart}Api`;
+  return `${methodPrefix}${pathPart}Api`
 }
 
 /**
@@ -765,25 +770,31 @@ export function getRequestDataTypeName(
   // 返回 GetCustomerV1RegionListDwgRequestType
   // /api/system/v1/menu/query/{menuId}`
   // 返回 GetSystemV1MenuQueryByMenuIdRequestType
-  
+
   // 获取请求方法前缀
-  const methodPrefix = interfaceInfo.method.toLowerCase() === 'get' ? 'Get' : 'Post';
-  
+  const methodPrefix =
+    interfaceInfo.method.toLowerCase() === 'get' ? 'Get' : 'Post'
+
   // 处理路径
-  let path = interfaceInfo.path;
-  
+  let path = interfaceInfo.path
+
   // 移除开头的斜杠和api前缀
-  path = path.replace(/^\/+/, '').replace(/^api\/+/, '');
-  
+  path = path.replace(/^\/+/, '').replace(/^api\/+/, '')
+
   // 将路径参数 {xxx} 转换为 ByXxx 格式
-  path = path.replace(/\{([^}]+)\}/g, (_, param) => `By${changeCase.pascalCase(param)}`);
-  
+  path = path.replace(
+    /\{([^}]+)\}/g,
+    (_, param) => `By${changeCase.pascalCase(param)}`,
+  )
+
   // 将路径分段并转换为驼峰格式
-  const pathSegments = path.split('/').filter(Boolean);
-  const pathPart = pathSegments.map(segment => changeCase.pascalCase(segment)).join('');
-  
+  const pathSegments = path.split('/').filter(Boolean)
+  const pathPart = pathSegments
+    .map(segment => changeCase.pascalCase(segment))
+    .join('')
+
   // 组合最终的类型名
-  return `${methodPrefix}${pathPart}RequestType`;
+  return `${methodPrefix}${pathPart}RequestType`
 }
 
 /**
@@ -800,25 +811,31 @@ export function getReponseDataTypeName(
   // 返回 GetCustomerV1RegionListDwgResponseType
   // /api/system/v1/menu/query/{menuId}`
   // 返回 GetSystemV1MenuQueryByMenuIdResponseType
-  
+
   // 获取请求方法前缀
-  const methodPrefix = interfaceInfo.method.toLowerCase() === 'get' ? 'Get' : 'Post';
-  
+  const methodPrefix =
+    interfaceInfo.method.toLowerCase() === 'get' ? 'Get' : 'Post'
+
   // 处理路径
-  let path = interfaceInfo.path;
-  
+  let path = interfaceInfo.path
+
   // 移除开头的斜杠和api前缀
-  path = path.replace(/^\/+/, '').replace(/^api\/+/, '');
-  
+  path = path.replace(/^\/+/, '').replace(/^api\/+/, '')
+
   // 将路径参数 {xxx} 转换为 ByXxx 格式
-  path = path.replace(/\{([^}]+)\}/g, (_, param) => `By${changeCase.pascalCase(param)}`);
-  
+  path = path.replace(
+    /\{([^}]+)\}/g,
+    (_, param) => `By${changeCase.pascalCase(param)}`,
+  )
+
   // 将路径分段并转换为驼峰格式
-  const pathSegments = path.split('/').filter(Boolean);
-  const pathPart = pathSegments.map(segment => changeCase.pascalCase(segment)).join('');
-  
+  const pathSegments = path.split('/').filter(Boolean)
+  const pathPart = pathSegments
+    .map(segment => changeCase.pascalCase(segment))
+    .join('')
+
   // 组合最终的类型名
-  return `${methodPrefix}${pathPart}ResponseType`;
+  return `${methodPrefix}${pathPart}ResponseType`
 }
 
 export function getOutputFilePath(
@@ -828,24 +845,18 @@ export function getOutputFilePath(
   const dirName = interfaceInfo._category.name
   // dirName 为 客户管理/业务套餐
   // 返回 src/service/kehuguanli/yewutaocan/index.ts
-  
-  // 将中文转换为拼音
-  const dirNameCn = dirName.split('/').map(segment => {
-    return pinyin(segment, {
-      style: 'normal', // 使用普通风格，不带声调
-      heteronym: false, // 禁用多音字，只取第一个读音
-    })
-      .reduce((acc, curr) => acc.concat(curr), []) // 将二维数组扁平化
-      .map(changeCase.upperCaseFirst)
-      .join('') // 连接成字符串
-  }).join('/')
 
-  // const dirNameCn = pinyin(dirName, {
-  //   style: 'normal', // 使用普通风格，不带声调
-  //   heteronym: false, // 禁用多音字，只取第一个读音
-  // })
-  //   .reduce((acc, curr) => acc.concat(curr), []) // 将二维数组扁平化
-  //   .join('') // 连接成字符串
-  
+  // 将中文转换为拼音
+  const dirNameCn = dirName
+    .split('/')
+    .map(
+      segment =>
+        TinyPinyin.convertToPinyin(segment)
+          .split(' ')
+          .map(changeCase.upperCaseFirst)
+          .join(''), // 连接成字符串
+    )
+    .join('/')
+
   return `src/service/${dirNameCn}/index.ts`
 }
