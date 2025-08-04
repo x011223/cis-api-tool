@@ -72,6 +72,7 @@
     "lodash": "^4.17.21",
     "node-fetch": "^2",
     "ora": "^3.4.0",
+    "pinyin": "^4.0.0",
     "prettier": "^2.7.1",
     "prompts": "^2.0.4",
     "proxy-agent": "^5.0.0",

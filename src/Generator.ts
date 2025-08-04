@@ -43,6 +43,7 @@ import {
   jsonSchemaToType,
   sortByWeights,
   throwError,
+  getOutputFilePath,
 } from './utils'
 import { SwaggerToYApiServer } from './SwaggerToYApiServer'
 
@@ -216,13 +217,7 @@ export class Generator {
                           >(async interfaceInfo => {
                             const outputFilePath = path.resolve(
                               this.options.cwd,
-                              typeof syntheticalConfig.outputFilePath ===
-                                'function'
-                                ? syntheticalConfig.outputFilePath(
-                                    interfaceInfo,
-                                    changeCase,
-                                  )
-                                : syntheticalConfig.outputFilePath!,
+                              getOutputFilePath(interfaceInfo, changeCase),
                             )
                             const categoryUID = `_${serverIndex}_${projectIndex}_${categoryIndex}_${categoryIndex2}`
                             const code = await this.generateInterfaceCode(

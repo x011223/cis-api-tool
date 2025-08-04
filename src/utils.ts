@@ -14,6 +14,7 @@ import isEmpty from 'lodash/isEmpty'
 import isObject from 'lodash/isObject'
 import mapKeys from 'lodash/mapKeys'
 import memoize from 'lodash/memoize'
+import pinyin from 'pinyin'
 import { traverse } from './vutils/function'
 import { compile, Options } from 'json-schema-to-typescript'
 import { Defined, OneOrMore } from './vutils/type'
@@ -818,4 +819,33 @@ export function getReponseDataTypeName(
   
   // 组合最终的类型名
   return `${methodPrefix}${pathPart}ResponseType`;
+}
+
+export function getOutputFilePath(
+  interfaceInfo: Interface,
+  changeCase: ChangeCase,
+): string {
+  const dirName = interfaceInfo._category.name
+  // dirName 为 客户管理/业务套餐
+  // 返回 src/service/kehuguanli/yewutaocan/index.ts
+  
+  // 将中文转换为拼音
+  const dirNameCn = dirName.split('/').map(segment => {
+    return pinyin(segment, {
+      style: 'normal', // 使用普通风格，不带声调
+      heteronym: false, // 禁用多音字，只取第一个读音
+    })
+      .reduce((acc, curr) => acc.concat(curr), []) // 将二维数组扁平化
+      .map(changeCase.upperCaseFirst)
+      .join('') // 连接成字符串
+  }).join('/')
+
+  // const dirNameCn = pinyin(dirName, {
+  //   style: 'normal', // 使用普通风格，不带声调
+  //   heteronym: false, // 禁用多音字，只取第一个读音
+  // })
+  //   .reduce((acc, curr) => acc.concat(curr), []) // 将二维数组扁平化
+  //   .join('') // 连接成字符串
+  
+  return `src/service/${dirNameCn}/index.ts`
 }
