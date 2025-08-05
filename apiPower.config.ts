@@ -10,11 +10,6 @@ export default defineConfig([
       enabled: false,
     },
     prodEnvName: 'production',
-    // outputFilePath: 'src/service/index.ts',
-    outputFilePath: (interfaceInfo, changeCase) => {
-      const fileDir = interfaceInfo._category.name
-      return `src/service/${fileDir}/index.ts`
-    },
     requestFunctionFilePath: 'src/service/request.ts',
     dataKey: 'data',
     projects: [

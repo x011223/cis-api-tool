@@ -845,18 +845,15 @@ export function getOutputFilePath(
   const dirName = interfaceInfo._category.name
   // dirName 为 客户管理/业务套餐
   // 返回 src/service/kehuguanli/yewutaocan/index.ts
-
   // 将中文转换为拼音
   const dirNameCn = dirName
     .split('/')
-    .map(
-      segment =>
-        TinyPinyin.convertToPinyin(segment)
-          .split(' ')
-          .map(changeCase.upperCaseFirst)
-          .join(''), // 连接成字符串
-    )
+    .map(segment => {
+      // 客户管理
+      return segment.split('').map(item => {
+        return changeCase.upperCaseFirst(changeCase.lowerCase(TinyPinyin.convertToPinyin(item)))
+      }).join('')
+    })
     .join('/')
-
   return `src/service/${dirNameCn}/index.ts`
 }

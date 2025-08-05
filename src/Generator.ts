@@ -217,7 +217,13 @@ export class Generator {
                           >(async interfaceInfo => {
                             const outputFilePath = path.resolve(
                               this.options.cwd,
-                              getOutputFilePath(interfaceInfo, changeCase),
+                              typeof syntheticalConfig.outputFilePath ===
+                                'function'
+                                ? syntheticalConfig.outputFilePath(
+                                    interfaceInfo,
+                                    changeCase,
+                                  )
+                                : getOutputFilePath(interfaceInfo, changeCase),
                             )
                             const categoryUID = `_${serverIndex}_${projectIndex}_${categoryIndex}_${categoryIndex2}`
                             const code = await this.generateInterfaceCode(
