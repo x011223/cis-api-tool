@@ -850,10 +850,52 @@ export function getOutputFilePath(
     .split('/')
     .map(segment => {
       // 客户管理
-      return segment.split('').map(item => {
-        return changeCase.upperCaseFirst(changeCase.lowerCase(TinyPinyin.convertToPinyin(item)))
-      }).join('')
+      return segment
+        .split('')
+        .map(item => {
+          return changeCase.upperCaseFirst(
+            changeCase.lowerCase(TinyPinyin.convertToPinyin(item)),
+          )
+        })
+        .join('')
     })
     .join('/')
   return `src/service/${dirNameCn}/index.ts`
+}
+
+export function transformPaths(pathsArray) {
+  // 目标路径片段，用于定位需要截取的位置
+  const targetSegments = ['src', 'service']
+
+  return pathsArray.map(originalPath => {
+    // 规范化路径，处理不同系统的分隔符
+    const normalizedPath = path.normalize(originalPath)
+    // 拆分路径为片段数组
+    const pathSegments = normalizedPath.split(path.sep)
+
+    // 查找 src/service 连续出现的位置
+    let targetIndex = -1
+    for (let i = 0; i < pathSegments.length - 1; i++) {
+      if (
+        pathSegments[i] === targetSegments[0] &&
+        pathSegments[i + 1] === targetSegments[1]
+      ) {
+        targetIndex = i
+        break
+      }
+    }
+
+    if (targetIndex === -1) {
+      // 如果未找到目标片段，返回原始路径（可根据需求调整错误处理）
+      return `// 无法处理路径: ${originalPath}`
+    }
+
+    // 提取 src/service 之后的路径片段
+    const relativeSegments = pathSegments.slice(targetIndex + 2)
+    // 组合为相对路径，使用 POSIX 风格的 '/' 作为分隔符（符合导入语句规范）
+    const relativePath = './' + relativeSegments.join('/') + '/index'
+
+    // 生成导出语句
+    return `export * from '${relativePath}';`
+  })
 }

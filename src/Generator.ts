@@ -1,10 +1,9 @@
 import * as changeCase from 'change-case'
+import { exec } from 'child_process'
 import dayjs from 'dayjs'
 import fs from 'fs-extra'
-import path from 'path'
 import castArray from 'lodash/castArray'
 import cloneDeep from 'lodash/cloneDeep'
-import { dedent } from './vutils/function'
 import groupBy from 'lodash/groupBy'
 import isEmpty from 'lodash/isEmpty'
 import isFunction from 'lodash/isFunction'
@@ -14,6 +13,8 @@ import noop from 'lodash/noop'
 import omit from 'lodash/omit'
 import uniq from 'lodash/uniq'
 import values from 'lodash/values'
+import path from 'path'
+import { SwaggerToYApiServer } from './SwaggerToYApiServer'
 import {
   CategoryList,
   CommentConfig,
@@ -29,23 +30,23 @@ import {
   ServerConfig,
   SyntheticalConfig,
 } from './types'
-import { exec } from 'child_process'
 import {
-  getRequestFunctionName,
   getCachedPrettierOptions,
   getNormalizedRelativePath,
+  getOutputFilePath,
   getPrettier,
   getReponseDataTypeName,
   getRequestDataJsonSchema,
   getRequestDataTypeName,
+  getRequestFunctionName,
   getResponseDataJsonSchema,
   httpGet,
   jsonSchemaToType,
   sortByWeights,
   throwError,
-  getOutputFilePath,
+  transformPaths,
 } from './utils'
-import { SwaggerToYApiServer } from './SwaggerToYApiServer'
+import { dedent } from './vutils/function'
 
 interface OutputFileList {
   [outputFilePath: string]: {
@@ -215,16 +216,19 @@ export class Generator {
                               code: string
                             }>
                           >(async interfaceInfo => {
-                            const outputFilePath = path.resolve(
-                              this.options.cwd,
+                            const _filePath =
                               typeof syntheticalConfig.outputFilePath ===
-                                'function'
+                              'function'
                                 ? syntheticalConfig.outputFilePath(
                                     interfaceInfo,
                                     changeCase,
                                   )
-                                : getOutputFilePath(interfaceInfo, changeCase),
+                                : getOutputFilePath(interfaceInfo, changeCase)
+                            const outputFilePath = path.resolve(
+                              this.options.cwd,
+                              _filePath,
                             )
+                            syntheticalConfig.fileDirectory = _filePath
                             const categoryUID = `_${serverIndex}_${projectIndex}_${categoryIndex}_${categoryIndex2}`
                             const code = await this.generateInterfaceCode(
                               syntheticalConfig,
@@ -242,6 +246,8 @@ export class Generator {
                               outputFilePath,
                               weights,
                               code,
+                              // 相对路径
+                              relativeFilePath: _filePath,
                             }
                           }),
                         )
@@ -346,8 +352,37 @@ export class Generator {
     return outputFileList
   }
 
+  /**
+   * 生成index.ts文件，将目录中的所有方法和interface类型导出
+   * @param directoryPaths 目录路径
+   */
+  async generateIndexFile(directoryPaths: string[]) {
+    // 检查目录是否存在
+    if (
+      !(await fs.pathExists(
+        path.resolve(this.options.cwd, 'src/service/index.ts'),
+      ))
+    ) {
+      // 创建index.ts文件
+      await fs.writeFile(
+        path.resolve(this.options.cwd, 'src/service/index.ts'),
+        '',
+      )
+    }
+    let content =
+      '/* prettier-ignore-start */\n/* tslint:disable */\n/* eslint-disable */\n\n/* 该文件由 cis-api-tool 自动生成，请勿直接修改！！！ */\n\n'
+    // 生成index.ts文件内容
+    const indexContent = transformPaths(directoryPaths).join('\n')
+    content += indexContent
+    content += '\n/* prettier-ignore-end */'
+    await fs.writeFile(
+      path.resolve(this.options.cwd, 'src/service/index.ts'),
+      indexContent,
+    )
+  }
+
   async write(outputFileList: OutputFileList) {
-    return Promise.all(
+    const result = await Promise.all(
       Object.keys(outputFileList).map(async outputFilePath => {
         let {
           // eslint-disable-next-line prefer-const
@@ -550,8 +585,25 @@ export class Generator {
             fs.remove(outputFilePath).catch(noop),
           ])
         }
+
+        return outputFilePath
       }),
     )
+    // 生成index.ts文件
+    // 收集所有生成的文件所在的目录
+    const directories = new Set<string>()
+    result.forEach(outputFilePath => {
+      const dirPath = path.dirname(outputFilePath)
+      directories.add(dirPath)
+    })
+    // 找出所有根目录（不是其他目录的子目录的目录）
+    const rootDirs = Array.from(directories).filter(dir => {
+      return !Array.from(directories).some(otherDir => {
+        return dir !== otherDir && dir.startsWith(otherDir + path.sep)
+      })
+    })
+    await this.generateIndexFile(rootDirs)
+    return outputFileList
   }
 
   async tsc(file: string) {
@@ -884,7 +936,9 @@ export class Generator {
         syntheticalConfig.typesOnly
           ? ''
           : dedent`
-            ${genComment(title => `@description 接口 ${title} 的 **请求配置的类型**`)}
+            ${genComment(
+              title => `@description 接口 ${title} 的 **请求配置的类型**`,
+            )}
             type ${requestConfigTypeName} = Readonly<RequestConfig<
               ${JSON.stringify(syntheticalConfig.mockUrl)},
               ${JSON.stringify(syntheticalConfig.devUrl)},
@@ -945,7 +999,9 @@ export class Generator {
             }
 
             ${genComment(title => `@description 接口 ${title} 的 **请求函数**`)}
-            export const ${requestFunctionName || 'ErrorRequestFunctionName'} = ${COMPRESSOR_TREE_SHAKING_ANNOTATION} (
+            export const ${
+              requestFunctionName || 'ErrorRequestFunctionName'
+            } = ${COMPRESSOR_TREE_SHAKING_ANNOTATION} (
               requestData${
                 isRequestDataOptional ? '?' : ''
               }: ${requestDataTypeName!},
@@ -957,15 +1013,27 @@ export class Generator {
               )
             }
 
-            ${requestFunctionName || 'ErrorRequestFunctionName'}.requestConfig = ${requestConfigName}
+            ${
+              requestFunctionName || 'ErrorRequestFunctionName'
+            }.requestConfig = ${requestConfigName}
 
             ${
               !syntheticalConfig.reactHooks ||
               !syntheticalConfig.reactHooks.enabled
                 ? ''
                 : dedent`
-                  ${genComment(title => `@description 接口 ${title} 的 **React Hook**`)}
-                  export const ${requestHookName || 'ErrorRequestHookName'} = ${COMPRESSOR_TREE_SHAKING_ANNOTATION} makeRequestHook<${requestDataTypeName || 'ErrorRequestDataTypeName'}, ${requestConfigTypeName}, ReturnType<typeof ${requestFunctionName || 'ErrorRequestFunctionName'}>>(${requestFunctionName || 'ErrorRequestFunctionName'} as any)
+                  ${genComment(
+                    title => `@description 接口 ${title} 的 **React Hook**`,
+                  )}
+                  export const ${
+                    requestHookName || 'ErrorRequestHookName'
+                  } = ${COMPRESSOR_TREE_SHAKING_ANNOTATION} makeRequestHook<${
+                    requestDataTypeName || 'ErrorRequestDataTypeName'
+                  }, ${requestConfigTypeName}, ReturnType<typeof ${
+                    requestFunctionName || 'ErrorRequestFunctionName'
+                  }>>(${
+                    requestFunctionName || 'ErrorRequestFunctionName'
+                  } as any)
                 `
             }
           `
