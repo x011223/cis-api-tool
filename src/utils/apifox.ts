@@ -30,7 +30,7 @@ export async function fetchApifoxOpenAPI(config: ApifoxConfig): Promise<OpenAPIV
   const {
     serverUrl,
     token,
-    projectId = '6720131', // 默认项目ID
+    projectId, // 移除默认值，让调用方必须提供
     exportOptions = {
       scope: {
         type: 'ALL'
@@ -43,6 +43,10 @@ export async function fetchApifoxOpenAPI(config: ApifoxConfig): Promise<OpenAPIV
       exportFormat: 'JSON'
     }
   } = config
+
+  if (!projectId) {
+    throw new Error('Apifox 项目 ID 是必需的')
+  }
 
   // 检查serverUrl是否已经包含完整路径
   let url: string

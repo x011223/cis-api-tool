@@ -2,8 +2,14 @@ import { defineConfig } from './src'
 
 export default defineConfig([
   {
-    serverUrl: 'https://api.apifox.com/v1/projects/6720131/export-openapi',
+    // 方式1：使用基础URL + apifoxProjectId配置
+    serverUrl: 'https://api.apifox.com',
     serverType: 'apifox',
+    apifoxProjectId: '6720131', // 新增：Apifox项目ID配置
+    // 方式2：也可以直接在serverUrl中包含项目ID（向后兼容）
+    // serverUrl: 'https://api.apifox.com/v1/projects/6720131/export-openapi',
+    // serverType: 'apifox',
+    // 此时可以不设置apifoxProjectId，代码会自动从URL中提取
     typesOnly: false,
     target: 'typescript',
     reactHooks: {

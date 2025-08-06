@@ -7,7 +7,7 @@
  * type Y = Defined<X> // => string
  * ```
  */
-export type Defined<T> = Exclude<T, undefined>
+export type Defined<T> = Exclude<T, undefined>;
 
 /**
  * @description 同 `T | T[]`。
@@ -17,7 +17,7 @@ export type Defined<T> = Exclude<T, undefined>
  * type X = OneOrMore<number> // => number | number[]
  * ```
  */
-export type OneOrMore<T> = T | T[]
+export type OneOrMore<T> = T | T[];
 
 export type {
     AnyArray,
@@ -45,10 +45,10 @@ export type {
     WritableKeys,
     OptionalKeys,
     RequiredKeys,
-    XOR
-  } from 'ts-essentials'
+    XOR,
+} from "ts-essentials";
 
-  export type {
+export type {
     LiteralUnion,
     AsyncReturnType,
     FixedLengthArray,
@@ -80,5 +80,4 @@ export type {
     RequireExactlyOne,
     RequireAllOrNone,
     SetRequiredDeep as RequiredDeepBy,
-  } from 'type-fest'
-  
+} from "type-fest";
