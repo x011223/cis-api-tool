@@ -258,33 +258,9 @@ export class Generator {
                         )
                         return Object.keys(groupedInterfaceCodes).map(
                           outputFilePath => {
-                            const categoryCode = [
-                              ...uniq(
-                                groupedInterfaceCodes[outputFilePath].map(
-                                  item => item.categoryUID,
-                                ),
-                              ).map(categoryUID =>
-                                syntheticalConfig.typesOnly
-                                  ? ''
-                                  : dedent`
-                                      const mockUrl${categoryUID} = ${JSON.stringify(
-                                      syntheticalConfig.mockUrl,
-                                    )} as any
-                                      const devUrl${categoryUID} = ${JSON.stringify(
-                                      syntheticalConfig.devUrl,
-                                    )} as any
-                                      const prodUrl${categoryUID} = ${JSON.stringify(
-                                      syntheticalConfig.prodUrl,
-                                    )} as any
-                                      const dataKey${categoryUID} = ${JSON.stringify(
-                                      syntheticalConfig.dataKey,
-                                    )} as any
-                                    `,
-                              ),
-                              ...groupedInterfaceCodes[outputFilePath].map(
-                                item => item.code,
-                              ),
-                            ]
+                            const categoryCode = groupedInterfaceCodes[outputFilePath].map(
+                              item => item.code,
+                            )
                               .filter(Boolean)
                               .join('\n\n')
                             if (!outputFileList[outputFilePath]) {
@@ -518,43 +494,12 @@ export class Generator {
               `
               : dedent`
                 // @ts-ignore
-                // prettier-ignore
-                import { QueryStringArrayFormat, Method, RequestBodyType, ResponseBodyType, FileData, prepare } from 'cis-api-tool'
-                // @ts-ignore
-                // prettier-ignore
-                import type { RequestConfig, RequestFunctionRestArgs } from 'cis-api-tool'
-                // @ts-ignore
                 import request from ${JSON.stringify(
                   getNormalizedRelativePath(
                     outputFilePath,
                     requestFunctionFilePath,
                   ),
                 )}
-                ${
-                  !syntheticalConfig.reactHooks ||
-                  !syntheticalConfig.reactHooks.enabled
-                    ? ''
-                    : dedent`
-                      // @ts-ignore
-                      import makeRequestHook from ${JSON.stringify(
-                        getNormalizedRelativePath(
-                          outputFilePath,
-                          requestHookMakerFilePath,
-                        ),
-                      )}
-                    `
-                }
-
-                type UserRequestRestArgs = RequestFunctionRestArgs<typeof request>
-
-                // Request: 目前 React Hooks 功能有用到
-                export type Request<TRequestData, TRequestConfig extends RequestConfig, TRequestResult> = (
-                  TRequestConfig['requestDataOptional'] extends true
-                    ? (requestData?: TRequestData, ...args: RequestFunctionRestArgs<typeof request>) => TRequestResult
-                    : (requestData: TRequestData, ...args: RequestFunctionRestArgs<typeof request>) => TRequestResult
-                ) & {
-                  requestConfig: TRequestConfig
-                }
 
                 ${content.join('\n\n').trim()}
               `
@@ -753,10 +698,6 @@ export class Generator {
           changeCase,
         )
       : getRequestFunctionName(extendedInterfaceInfo, changeCase)
-    const requestConfigName = changeCase.camelCase(
-      `${requestFunctionName}RequestConfig`,
-    )
-    const requestConfigTypeName = changeCase.pascalCase(requestConfigName)
     const requestDataTypeName = isFunction(
       syntheticalConfig.getRequestDataTypeName,
     )
@@ -802,21 +743,7 @@ export class Generator {
           : `use${changeCase.pascalCase(requestFunctionName)}`
         : ''
 
-    // 支持路径参数
-    const paramNames = (
-      extendedInterfaceInfo.req_params /* istanbul ignore next */ || []
-    ).map((item: any) => item.name)
-    const paramNamesLiteral = JSON.stringify(paramNames)
-    const paramNameType =
-      paramNames.length === 0 ? 'string' : `'${paramNames.join("' | '")}'`
 
-    // 支持查询参数
-    const queryNames = (
-      extendedInterfaceInfo.req_query /* istanbul ignore next */ || []
-    ).map(item => item.name)
-    const queryNamesLiteral = JSON.stringify(queryNames)
-    const queryNameType =
-      queryNames.length === 0 ? 'string' : `'${queryNames.join("' | '")}'`
 
     // 接口注释
     const genComment = (genTitle: (title: string) => string) => {
@@ -859,23 +786,23 @@ export class Generator {
           }
       > = [
         hasCategory && {
-          label: '分类',
+          label: 'category',
           value: hasLink
             ? `[${extendedInterfaceInfo._category.name}↗](${extendedInterfaceInfo._category._url})`
             : extendedInterfaceInfo._category.name,
         },
         hasTag && {
-          label: '标签',
+          label: 'tag',
           value: extendedInterfaceInfo.tag.map(tag => `\`${tag}\``),
         },
         hasRequestHeader && {
-          label: '请求头',
+          label: 'requestHeader',
           value: `\`${extendedInterfaceInfo.method.toUpperCase()} ${
             extendedInterfaceInfo.path
           }\``,
         },
         hasUpdateTime && {
-          label: '更新时间',
+          label: 'updateTime',
           value: process.env.JEST_WORKER_ID // 测试时使用 unix 时间戳
             ? String(extendedInterfaceInfo.up_time)
             : /* istanbul ignore next */
@@ -916,14 +843,7 @@ export class Generator {
       `
     }
 
-    // 请求参数额外信息
-    const requestFunctionExtraInfo =
-      typeof syntheticalConfig.setRequestFunctionExtraInfo === 'function'
-        ? await syntheticalConfig.setRequestFunctionExtraInfo(
-            extendedInterfaceInfo,
-            changeCase,
-          )
-        : {}
+
 
     return dedent`
       ${genComment(title => `@description 接口 ${title} 的 **请求类型**`)}
@@ -936,105 +856,15 @@ export class Generator {
         syntheticalConfig.typesOnly
           ? ''
           : dedent`
-            ${genComment(
-              title => `@description 接口 ${title} 的 **请求配置的类型**`,
-            )}
-            type ${requestConfigTypeName} = Readonly<RequestConfig<
-              ${JSON.stringify(syntheticalConfig.mockUrl)},
-              ${JSON.stringify(syntheticalConfig.devUrl)},
-              ${JSON.stringify(syntheticalConfig.prodUrl)},
-              ${JSON.stringify(extendedInterfaceInfo.path)},
-              ${JSON.stringify(syntheticalConfig.dataKey) || 'undefined'},
-              ${paramNameType},
-              ${queryNameType},
-              ${JSON.stringify(isRequestDataOptional)}
-            >>
-
-            ${genComment(title => `@description 接口 ${title} 的 **请求配置**`)}
-            const ${requestConfigName}: ${requestConfigTypeName} = ${COMPRESSOR_TREE_SHAKING_ANNOTATION} {
-              mockUrl: mockUrl${categoryUID},
-              devUrl: devUrl${categoryUID},
-              prodUrl: prodUrl${categoryUID},
-              path: ${JSON.stringify(extendedInterfaceInfo.path)},
-              method: Method.${extendedInterfaceInfo.method},
-              requestHeaders: ${JSON.stringify(
-                (extendedInterfaceInfo.req_headers || [])
-                  .filter(item => item.name.toLowerCase() !== 'content-type')
-                  .reduce<Record<string, string>>((res, item) => {
-                    res[item.name] = item.value
-                    return res
-                  }, {}),
-              )},
-              requestBodyType: RequestBodyType.${
-                extendedInterfaceInfo.method === Method.GET
-                  ? RequestBodyType.query
-                  : extendedInterfaceInfo.req_body_type /* istanbul ignore next */ ||
-                    RequestBodyType.none
-              },
-              responseBodyType: ResponseBodyType.${
-                extendedInterfaceInfo.res_body_type
-              },
-              dataKey: dataKey${categoryUID},
-              paramNames: ${paramNamesLiteral},
-              queryNames: ${queryNamesLiteral},
-              requestDataOptional: ${JSON.stringify(isRequestDataOptional)},
-              requestDataJsonSchema: ${JSON.stringify(
-                syntheticalConfig.jsonSchema?.enabled &&
-                  syntheticalConfig.jsonSchema?.requestData !== false
-                  ? requestDataJsonSchema
-                  : {},
-              )},
-              responseDataJsonSchema: ${JSON.stringify(
-                syntheticalConfig.jsonSchema?.enabled &&
-                  syntheticalConfig.jsonSchema?.responseData !== false
-                  ? responseDataJsonSchema
-                  : {},
-              )},
-              requestFunctionName: ${JSON.stringify(requestFunctionName)},
-              queryStringArrayFormat: QueryStringArrayFormat.${
-                syntheticalConfig.queryStringArrayFormat ||
-                QueryStringArrayFormat.brackets
-              },
-              extraInfo: ${JSON.stringify(requestFunctionExtraInfo)},
-            }
-
             ${genComment(title => `@description 接口 ${title} 的 **请求函数**`)}
             export const ${
               requestFunctionName || 'ErrorRequestFunctionName'
-            } = ${COMPRESSOR_TREE_SHAKING_ANNOTATION} (
-              requestData${
-                isRequestDataOptional ? '?' : ''
-              }: ${requestDataTypeName!},
-              ...args: UserRequestRestArgs
+            } = (
+              params: ${requestDataTypeName!}
             ) => {
-              return request<${responseDataTypeName!}>(
-                prepare(${requestConfigName}, requestData),
-                ...args,
+              return request.${extendedInterfaceInfo.method.toLowerCase()}<${responseDataTypeName!}>(
+                ${JSON.stringify(extendedInterfaceInfo.path)}, params
               )
-            }
-
-            ${
-              requestFunctionName || 'ErrorRequestFunctionName'
-            }.requestConfig = ${requestConfigName}
-
-            ${
-              !syntheticalConfig.reactHooks ||
-              !syntheticalConfig.reactHooks.enabled
-                ? ''
-                : dedent`
-                  ${genComment(
-                    title => `@description 接口 ${title} 的 **React Hook**`,
-                  )}
-                  export const ${
-                    requestHookName || 'ErrorRequestHookName'
-                  } = ${COMPRESSOR_TREE_SHAKING_ANNOTATION} makeRequestHook<${
-                    requestDataTypeName || 'ErrorRequestDataTypeName'
-                  }, ${requestConfigTypeName}, ReturnType<typeof ${
-                    requestFunctionName || 'ErrorRequestFunctionName'
-                  }>>(${
-                    requestFunctionName || 'ErrorRequestFunctionName'
-                  } as any)
-                `
             }
           `
       }
