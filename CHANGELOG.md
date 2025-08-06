@@ -1,6 +1,8 @@
 # 更新日志
 
 
+### [0.0.10](https://github.com/x011223/cis-api-tool/compare/v0.0.9...v0.0.10) (2025-08-06)
+
 ### [0.0.9](https://github.com/x011223/cis-api-tool/compare/v0.0.8...v0.0.9) (2025-08-06)
 
 ### [0.0.8](https://github.com/x011223/cis-api-tool/compare/v0.0.7...v0.0.8) (2025-08-06)
