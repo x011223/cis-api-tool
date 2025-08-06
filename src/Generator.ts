@@ -15,6 +15,7 @@ import uniq from 'lodash/uniq'
 import values from 'lodash/values'
 import path from 'path'
 import { SwaggerToYApiServer } from './SwaggerToYApiServer'
+import { ApifoxToYApiServer } from './ApifoxToYApiServer'
 import {
   CategoryList,
   CommentConfig,
@@ -78,6 +79,19 @@ export class Generator {
           })
           item.serverUrl = await swaggerToYApiServer.start()
           this.disposes.push(() => swaggerToYApiServer.stop())
+        }
+        if (item.serverType === 'apifox') {
+          // 获取第一个项目的第一个token
+          const firstProject = item.projects[0]
+          const firstToken = firstProject ? castArray(firstProject.token)[0] : ''
+          
+          const apifoxToYApiServer = new ApifoxToYApiServer({
+            serverUrl: item.serverUrl,
+            token: firstToken,
+            projectId: '6720131',
+          })
+          item.serverUrl = await apifoxToYApiServer.start()
+          this.disposes.push(() => apifoxToYApiServer.stop())
         }
         if (item.serverUrl) {
           // 去除地址后面的 /

@@ -896,6 +896,6 @@ export function transformPaths(pathsArray) {
     const relativePath = './' + relativeSegments.join('/') + '/index'
 
     // 生成导出语句
-    return `export * from '${relativePath}';`
+    return `export * from '${relativePath}'`
   })
 }

@@ -2,8 +2,8 @@ import { defineConfig } from './src'
 
 export default defineConfig([
   {
-    serverUrl: 'http://127.0.0.1:4523/export/openapi/2?version=3.1',
-    serverType: 'swagger',
+    serverUrl: 'https://api.apifox.com/v1/projects/6720131/export-openapi',
+    serverType: 'apifox',
     typesOnly: false,
     target: 'typescript',
     reactHooks: {
@@ -14,7 +14,7 @@ export default defineConfig([
     dataKey: 'data',
     projects: [
       {
-        token: 'hello',
+        token: 'APS-LgZ1R00wf6AEgdHUzTPHBS3wZCBxPZdw',
         categories: [
           {
             id: 0,

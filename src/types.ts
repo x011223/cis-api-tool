@@ -671,7 +671,7 @@ export interface ServerConfig extends SharedConfig {
    *
    * @default 'yapi'
    */
-  serverType?: 'yapi' | 'swagger'
+  serverType?: 'yapi' | 'swagger' | 'apifox'
 
   /**
    * 项目列表。
