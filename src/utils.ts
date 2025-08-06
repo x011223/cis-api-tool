@@ -389,7 +389,7 @@ const JSTTOptions: Partial<Options> = {
     printWidth: 120,
     semi: true,
     singleQuote: true,
-    tabWidth: 2,
+    tabWidth: 4,
     trailingComma: 'none',
     useTabs: false,
   },
@@ -646,7 +646,7 @@ export async function getPrettierOptions(): Promise<prettier.Options> {
   const prettierOptions: prettier.Options = {
     parser: 'typescript',
     printWidth: 120,
-    tabWidth: 2,
+    tabWidth: 4,
     singleQuote: true,
     semi: false,
     trailingComma: 'all',

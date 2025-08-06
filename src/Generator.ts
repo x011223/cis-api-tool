@@ -22,11 +22,8 @@ import {
   ExtendedInterface,
   Interface,
   InterfaceList,
-  Method,
   Project,
   ProjectConfig,
-  QueryStringArrayFormat,
-  RequestBodyType,
   ServerConfig,
   SyntheticalConfig,
 } from './types'
@@ -56,12 +53,6 @@ interface OutputFileList {
     requestHookMakerFilePath: string
   }
 }
-
-/**
- * @see https://webpack.js.org/guides/tree-shaking/#mark-a-function-call-as-side-effect-free
- * @see https://terser.org/docs/api-reference.html#annotations
- */
-const COMPRESSOR_TREE_SHAKING_ANNOTATION = '/*#__PURE__*/'
 
 export class Generator {
   /** 配置 */
@@ -258,9 +249,10 @@ export class Generator {
                         )
                         return Object.keys(groupedInterfaceCodes).map(
                           outputFilePath => {
-                            const categoryCode = groupedInterfaceCodes[outputFilePath].map(
-                              item => item.code,
-                            )
+                            const categoryCode = groupedInterfaceCodes[
+                              outputFilePath
+                            ]
+                              .map(item => item.code)
                               .filter(Boolean)
                               .join('\n\n')
                             if (!outputFileList[outputFilePath]) {
@@ -743,8 +735,6 @@ export class Generator {
           : `use${changeCase.pascalCase(requestFunctionName)}`
         : ''
 
-
-
     // 接口注释
     const genComment = (genTitle: (title: string) => string) => {
       const {
@@ -796,10 +786,12 @@ export class Generator {
           value: extendedInterfaceInfo.tag.map(tag => `\`${tag}\``),
         },
         hasRequestHeader && {
-          label: 'requestHeader',
-          value: `\`${extendedInterfaceInfo.method.toUpperCase()} ${
-            extendedInterfaceInfo.path
-          }\``,
+          label: 'method',
+          value: `${extendedInterfaceInfo.method.toUpperCase()}`,
+        },
+        hasRequestHeader && {
+          label: 'path',
+          value: `${extendedInterfaceInfo.path}`,
         },
         hasUpdateTime && {
           label: 'updateTime',
@@ -842,8 +834,6 @@ export class Generator {
          */
       `
     }
-
-
 
     return dedent`
       ${genComment(title => `@description 接口 ${title} 的 **请求类型**`)}

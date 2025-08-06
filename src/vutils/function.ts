@@ -1,42 +1,6 @@
 import { isPlainObject, forOwn, has } from "lodash"
 
-/**
- * @description 每一行紧跟前导空白的插入值为多行时，保持缩进。
- * @public
- * @param literals 字面值
- * @param interpolations 插入值
- * @returns 返回处理后的结果
- * @example
- * ```typescript
- * indent` ${'a\nb'}` // => ' a\n b'
- * ```
- */
-export function indent(
-    literals: TemplateStringsArray,
-    ...interpolations: Array<string | number>
-  ): string {
-    let result = ''
-  
-    for (let i = 0; i < interpolations.length; i++) {
-      const literal = literals[i]
-      let interpolation = interpolations[i]
-      const match = literal.match(/(?:^|[\r\n]+)([^\S\r\n]*)$/)
-      if (match && match[1]) {
-        interpolation = String(interpolation).replace(
-          // fix: 后行断言部分浏览器暂不支持
-          // /(?<=[\r\n]+)(?=[^\r\n])/g,
-          /([\r\n]+)(?=[^\r\n])/g,
-          `$1${match[1]}`,
-        )
-      }
-      result += literal
-      result += interpolation
-    }
-  
-    result += literals[literals.length - 1]
-  
-    return result
-  }
+
 
 
 /**
@@ -86,7 +50,24 @@ export function dedent(
   ...interpolations: Array<string | number>
 ): string {
   const text = Array.isArray(literals)
-    ? indent(literals as TemplateStringsArray, ...interpolations)
+    ? (() => {
+        let result = ''
+        for (let i = 0; i < interpolations.length; i++) {
+          const literal = literals[i]
+          let interpolation = interpolations[i]
+          const match = literal.match(/(?:^|[\r\n]+)([^\S\r\n]*)$/)
+          if (match && match[1]) {
+            interpolation = String(interpolation).replace(
+              /([\r\n]+)(?=[^\r\n])/g,
+              `$1${match[1]}`,
+            )
+          }
+          result += literal
+          result += interpolation
+        }
+        result += literals[literals.length - 1]
+        return result
+      })()
     : (literals as string)
 
   // 公共的前导空白
@@ -179,55 +160,7 @@ wait.reject = function reject(
   return res
 }
 
-/**
- * @description 深克隆快速版。
- * @param value 要克隆的值
- * @param ignore 忽略的值
- * @returns 返回克隆后的值
- * @example
- * ```typescript
- * cloneDeepFast({ x: [1] })
- * // => { x: [1] }
- * ```
- */
-export function cloneDeepFast<T>(
-  value: T,
-  ignore?: (value: unknown) => boolean | undefined,
-): T {
-  if (typeof value !== 'object' || value === null) return value
-  if (value instanceof Date) return new Date(value) as any
-  if (Array.isArray(value)) return cloneArray(value, ignore) as any
-  const o2: Record<string, any> = {}
-  for (const k in value) {
-    if (Object.hasOwnProperty.call(value, k) === false) continue
-    const cur = (value as any)[k]
-    if (typeof cur !== 'object' || cur === null || (ignore && ignore(cur))) {
-      o2[k] = cur
-    } else if (cur instanceof Date) {
-      o2[k] = new Date(cur)
-    } else {
-      o2[k] = cloneDeepFast(cur, ignore)
-    }
-  }
-  return o2 as T
-}
 
-export function cloneArray<T>(a: T[], ignore?: (value: unknown) => boolean | undefined): T[] {
-  const keys = Object.keys(a)
-  const a2 = new Array(keys.length)
-  for (let i = 0; i < keys.length; i++) {
-    const k: any = keys[i]
-    const cur = a[k]
-    if (typeof cur !== 'object' || cur === null || (ignore && ignore(cur))) {
-      a2[k] = cur
-    } else if (cur instanceof Date) {
-      a2[k] = new Date(cur)
-    } else {
-      a2[k] = cloneDeepFast(cur, ignore)
-    }
-  }
-  return a2
-}
 
 /**
  * 遍历对象和数组。
