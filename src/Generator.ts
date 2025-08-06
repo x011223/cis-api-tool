@@ -218,7 +218,7 @@ export class Generator {
                                                                 "getProdUrl"
                                                             );
                                                         // 预处理
-                                                        const _interfaceInfo =
+                                                        let _interfaceInfo =
                                                             isFunction(
                                                                 syntheticalConfig.preproccessInterface
                                                             )
@@ -230,6 +230,18 @@ export class Generator {
                                                                       syntheticalConfig
                                                                   )
                                                                 : interfaceInfo;
+
+                                                        // 处理路径前缀
+                                                        if (_interfaceInfo && syntheticalConfig.pathPrefix) {
+                                                            const pathPrefix = syntheticalConfig.pathPrefix;
+                                                            if (_interfaceInfo.path.startsWith(pathPrefix)) {
+                                                                _interfaceInfo.path = _interfaceInfo.path.substring(pathPrefix.length);
+                                                                // 确保路径以 / 开头
+                                                                if (!_interfaceInfo.path.startsWith('/')) {
+                                                                    _interfaceInfo.path = '/' + _interfaceInfo.path;
+                                                                }
+                                                            }
+                                                        }
 
                                                         return _interfaceInfo;
                                                     })

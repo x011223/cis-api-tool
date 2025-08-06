@@ -470,6 +470,14 @@ export interface SharedConfig {
     typesOnly?: boolean;
 
     /**
+     * 统一去掉接口路径的某部分。
+     * 例如设置为 '/api' 时，接口路径 '/api/user/list' 会变成 '/user/list'。
+     *
+     * @example '/api'
+     */
+    pathPrefix?: string;
+
+    /**
      * 测试环境名称。
      *
      * **用于获取测试环境域名。**

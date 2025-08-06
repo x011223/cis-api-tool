@@ -12,6 +12,8 @@ export default defineConfig([
     // 此时可以不设置apifoxProjectId，代码会自动从URL中提取
     typesOnly: false,
     target: 'typescript',
+    // 统一去掉接口路径的某部分，例如 '/api'
+    pathPrefix: '/api',
     reactHooks: {
       enabled: false,
     },

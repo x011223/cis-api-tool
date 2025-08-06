@@ -39,6 +39,31 @@ npx apiPower init -c config/apiPower.ts
 
 是否只生成接口请求内容和返回内容的 TypeSript 类型，是则请求文件和请求函数都不会生成。
 
+### pathPrefix
+
+- 类型：`string`
+- 默认值：`(无)`
+- 说明：
+
+统一去掉接口路径的某部分。例如设置为 `/api` 时，接口路径 `/api/user/list` 会变成 `/user/list`。
+
+这个配置项主要用于去掉接口路径中的公共前缀，让生成的请求函数使用更简洁的路径。
+
+**示例：**
+
+```javascript
+import { defineConfig } from 'cis-api-tool'
+
+export default defineConfig({
+  pathPrefix: '/api', // 去掉 /api 前缀
+  // 其他配置...
+})
+```
+
+**效果：**
+- 原始路径：`/api/user/list` → 处理后：`/user/list`
+- 原始路径：`/api/biz/v1/mr/pageBizMrRead` → 处理后：`/biz/v1/mr/pageBizMrRead`
+
 ### devEnvName
 
 - 类型：`string`
