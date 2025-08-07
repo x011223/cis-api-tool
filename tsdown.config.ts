@@ -3,7 +3,7 @@ import { defineConfig } from 'tsdown/config'
 export default defineConfig([
   {
     // ESM配置
-    entry: ['src/**/*.ts'],
+    entry: ['src/**/*.ts', '!src/service/**/*'],
     format: 'esm',
     target: 'ESNext',
     outDir: 'lib/esm',
@@ -11,7 +11,7 @@ export default defineConfig([
   },
   {
     // CJS配置
-    entry: ['src/**/*.ts'],
+    entry: ['src/**/*.ts', '!src/service/**/*'],
     format: 'cjs',
     target: 'node18',
     outDir: 'lib/cjs',
