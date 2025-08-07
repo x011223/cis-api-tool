@@ -849,9 +849,15 @@ export class Generator {
                 : "";
 
         // 处理路径参数，将 {paramName} 格式替换为模板字符串格式
-        const processPathParams = (path: string): string => {
+        const processPathParams = (path: string): { processedPath: string; useTemplate: boolean } => {
+            // 检查是否包含路径参数
+            const hasPathParams = /\{[^}]+\}/.test(path);
+            if (!hasPathParams) {
+                return { processedPath: path, useTemplate: false };
+            }
             // 匹配 {paramName} 格式的路径参数
-            return path.replace(/\{([^}]+)\}/g, '${params.$1}');
+            const processedPath = path.replace(/\{([^}]+)\}/g, '${params.$1}');
+            return { processedPath, useTemplate: true };
         };
 
         // 接口注释
@@ -960,7 +966,7 @@ export class Generator {
         };
 
         // 处理路径参数
-        const processedPath = processPathParams(extendedInterfaceInfo.path);
+        const { processedPath, useTemplate } = processPathParams(extendedInterfaceInfo.path);
 
         return dedent`
             ${genComment((title) => `@description 接口 ${title} 的 **请求类型**`)}
@@ -982,7 +988,7 @@ export class Generator {
                   params: ${requestDataTypeName!}
                 ) => {
                   return request.${extendedInterfaceInfo.method.toLowerCase()}<${responseDataTypeName!}>(
-                    \`${processedPath}\`, params
+                    ${useTemplate ? `\`${processedPath}\`` : JSON.stringify(processedPath)}, params
                   )
                 }
               `
