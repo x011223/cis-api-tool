@@ -848,6 +848,12 @@ export class Generator {
                     : `use${changeCase.pascalCase(requestFunctionName)}`
                 : "";
 
+        // 处理路径参数，将 {paramName} 格式替换为模板字符串格式
+        const processPathParams = (path: string): string => {
+            // 匹配 {paramName} 格式的路径参数
+            return path.replace(/\{([^}]+)\}/g, '${params.$1}');
+        };
+
         // 接口注释
         const genComment = (genTitle: (title: string) => string) => {
             const {
@@ -953,6 +959,9 @@ export class Generator {
           `;
         };
 
+        // 处理路径参数
+        const processedPath = processPathParams(extendedInterfaceInfo.path);
+
         return dedent`
             ${genComment((title) => `@description 接口 ${title} 的 **请求类型**`)}
             ${requestDataType.trim()}
@@ -973,7 +982,7 @@ export class Generator {
                   params: ${requestDataTypeName!}
                 ) => {
                   return request.${extendedInterfaceInfo.method.toLowerCase()}<${responseDataTypeName!}>(
-                    ${JSON.stringify(extendedInterfaceInfo.path)}, params
+                    \`${processedPath}\`, params
                   )
                 }
               `
