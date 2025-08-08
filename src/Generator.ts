@@ -438,16 +438,62 @@ export class Generator {
                 ""
             );
         }
+
+        // 递归处理所有目录，包括子目录
+        const allDirectories = new Set<string>();
+        
+        // 收集所有目录和子目录
+        for (const dir of directoryPaths) {
+            // 检查根目录是否有 index.ts 文件
+            const rootIndexPath = path.resolve(this.options.cwd, dir, 'index.ts');
+            if (await fs.pathExists(rootIndexPath)) {
+                allDirectories.add(dir);
+            }
+            await this.collectSubDirectories(dir, allDirectories);
+        }
+
         let content =
             "/* prettier-ignore-start */\n/* tslint:disable */\n/* eslint-disable */\n\n/* 该文件由 cis-api-tool 自动生成，请勿直接修改！！！ */\n\n";
+        
         // 生成index.ts文件内容
-        const indexContent = transformPaths(directoryPaths).join("\n");
+        const indexContent = transformPaths(Array.from(allDirectories)).join("\n");
         content += indexContent;
         content += "\n/* prettier-ignore-end */";
+        
         await fs.writeFile(
             path.resolve(this.options.cwd, "src/service/index.ts"),
-            indexContent
+            content
         );
+    }
+
+    // 新增方法：递归收集子目录
+    private async collectSubDirectories(dirPath: string, allDirectories: Set<string>) {
+        try {
+            const fullPath = path.resolve(this.options.cwd, dirPath);
+            if (await fs.pathExists(fullPath)) {
+                const items = await fs.readdir(fullPath);
+                for (const item of items) {
+                    const itemPath = path.join(fullPath, item);
+                    const stat = await fs.stat(itemPath);
+                    if (stat.isDirectory()) {
+                        // 使用 path.join 来确保路径分隔符的一致性
+                        const subDirPath = path.join(dirPath, item);
+                        
+                        // 检查子目录是否有 index.ts 文件
+                        const indexFilePath = path.join(itemPath, 'index.ts');
+                        if (await fs.pathExists(indexFilePath)) {
+                            allDirectories.add(subDirPath);
+                        }
+                        
+                        // 递归处理子目录
+                        await this.collectSubDirectories(subDirPath, allDirectories);
+                    }
+                }
+            }
+        } catch (error) {
+            // 忽略错误，继续处理其他目录
+            console.warn(`Warning: Failed to collect subdirectories for ${dirPath}:`, error);
+        }
     }
 
     async write(outputFileList: OutputFileList) {

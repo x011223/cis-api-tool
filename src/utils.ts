@@ -908,10 +908,16 @@ export function transformPaths(pathsArray) {
 
         // 提取 src/service 之后的路径片段
         const relativeSegments = pathSegments.slice(targetIndex + 2);
+        
+        // 如果没有相对路径片段，说明是 src/service 目录本身
+        if (relativeSegments.length === 0) {
+            return `// 根目录: ${originalPath}`;
+        }
+        
         // 组合为相对路径，使用 POSIX 风格的 '/' 作为分隔符（符合导入语句规范）
         const relativePath = "./" + relativeSegments.join("/") + "/index";
 
         // 生成导出语句
         return `export * from '${relativePath}'`;
-    });
+    }).filter(Boolean); // 过滤掉空值和注释
 }
