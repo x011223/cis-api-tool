@@ -39,11 +39,7 @@
         "docs:build": "dumi build",
         "docs:dev": "dumi dev",
         "release": "standard-version -a && pnpm build && pnpm docs && git push --follow-tags origin main && pnpm publish",
-        "releaseBeta": "pnpm testOnly && standard-version -a --release-as patch --prerelease beta && pnpm build && git push --follow-tags origin master && npm publish --tag next",
-        "test": "jest --coverage",
-        "testApi": "ts-node -T src/cli.ts",
-        "testOnly": "jest",
-        "testUpdateSnapshot": "jest --coverage -u"
+        "releaseBeta": "standard-version -a --release-as patch --prerelease beta && pnpm build && git push --follow-tags origin master && npm publish --tag next"
     },
     "husky": {
         "hooks": {
