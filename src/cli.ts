@@ -165,7 +165,9 @@ export async function run(
         try {
             config = require(configFile).default;
             generator = new Generator(config!, { cwd });
-
+            // 清理outputDir下的文件，但保留requestFunctionFilePath指定的文件
+            await generator.cleanOutputDirectory();
+            consola.info(`清理outputDir下的文件，但保留requestFunctionFilePath指定的文件`);
             spinner = ora("正在获取数据并生成代码...").start();
             const delayNotice = wait(5000);
             delayNotice.then(() => {

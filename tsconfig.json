@@ -15,7 +15,8 @@
     "jsx": "preserve",
     "lib": ["ESNext", "DOM"],
     "paths": {
-      "cis-api-tool": ["./src/index.ts"]
+      "cis-api-tool": ["./src/index.ts"],
+      "@/*": ["./src/*"]
     },
     "outDir": "./dist",
     "plugins": [

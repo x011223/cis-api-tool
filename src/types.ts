@@ -504,13 +504,15 @@ export interface SharedConfig {
     prodEnvName?: string;
 
     /**
-     * 输出文件路径。
+     * 输出目录。
      *
      * 可以是 `相对路径` 或 `绝对路径`。
+     * 如果不指定，默认使用 'src/service'。
      *
-     * @example 'src/api/index.ts'
+     * @example 'src/api'
+     * @example 'dist/types'
      */
-    outputFilePath?:
+    outputDir?:
         | string
         | ((interfaceInfo: Interface, changeCase: ChangeCase) => string);
 

@@ -2,6 +2,7 @@ import * as changeCase from "change-case";
 import { exec } from "child_process";
 import dayjs from "dayjs";
 import fs from "fs-extra";
+import consola from "consola";
 import castArray from "lodash/castArray";
 import cloneDeep from "lodash/cloneDeep";
 import groupBy from "lodash/groupBy";
@@ -30,7 +31,7 @@ import {
 } from "./types";
 import {
     getCachedPrettierOptions,
-    getNormalizedRelativePath,
+    getNormalizedPathWithAlias,
     getOutputFilePath,
     getPrettier,
     getReponseDataTypeName,
@@ -47,7 +48,7 @@ import {
 import { dedent } from "./vutils/function";
 
 interface OutputFileList {
-    [outputFilePath: string]: {
+    [outputDir: string]: {
         syntheticalConfig: SyntheticalConfig;
         content: string[];
         requestFunctionFilePath: string;
@@ -103,6 +104,58 @@ export class Generator {
                 return item;
             })
         );
+
+    }
+
+    /**
+     * 清理输出目录，删除之前生成的文件但保留requestFunctionFilePath指定的文件
+     */
+    async cleanOutputDirectory(): Promise<void> {
+        try {
+            // 获取配置中的outputDir和requestFunctionFilePath
+            const config = this.config[0];
+            if (!config) return;
+
+            const outputDir = typeof config.outputDir === 'string' ? config.outputDir : 'src/service';
+            const requestFunctionFilePath = config.requestFunctionFilePath || 'src/service/request.ts';
+
+            // 检查outputDir是否存在
+            const fullOutputDir = path.resolve(this.options.cwd, outputDir);
+            if (!(await fs.pathExists(fullOutputDir))) {
+                return; // 目录不存在，无需清理
+            }
+
+            // 获取requestFunctionFilePath的绝对路径
+            const fullRequestFilePath = path.resolve(this.options.cwd, requestFunctionFilePath);
+            
+            // 检查requestFunctionFilePath是否在outputDir下
+            const isRequestFileInOutputDir = fullRequestFilePath.startsWith(fullOutputDir + path.sep) || 
+                                           fullRequestFilePath === fullOutputDir;
+
+            if (!isRequestFileInOutputDir) {
+                // 如果requestFunctionFilePath不在outputDir下，直接清空整个outputDir
+                await fs.emptyDir(fullOutputDir);
+                return;
+            }
+
+            // 如果requestFunctionFilePath在outputDir下，需要保留该文件
+            // 先读取request文件内容（如果存在）
+            let requestFileContent = '';
+            if (await fs.pathExists(fullRequestFilePath)) {
+                requestFileContent = await fs.readFile(fullRequestFilePath, 'utf-8');
+            }
+
+            // 清空整个outputDir
+            await fs.emptyDir(fullOutputDir);
+
+            // 如果之前存在request文件，重新创建
+            if (requestFileContent) {
+                await fs.outputFile(fullRequestFilePath, requestFileContent);
+            }
+        } catch (error) {
+            console.warn('清理输出目录时出现警告:', error);
+            // 不抛出错误，继续执行
+        }
     }
 
     async generate(): Promise<OutputFileList> {
@@ -281,15 +334,16 @@ export class Generator {
                                                                 interfaceInfo
                                                             ) => {
                                                                 const _filePath =
-                                                                    typeof syntheticalConfig.outputFilePath ===
+                                                                    typeof syntheticalConfig.outputDir ===
                                                                     "function"
-                                                                        ? syntheticalConfig.outputFilePath(
+                                                                        ? syntheticalConfig.outputDir(
                                                                               interfaceInfo,
                                                                               changeCase
                                                                           )
                                                                         : getOutputFilePath(
                                                                               interfaceInfo,
-                                                                              changeCase
+                                                                              changeCase,
+                                                                              syntheticalConfig.outputDir || 'src/service'
                                                                           );
                                                                 const outputFilePath =
                                                                     path.resolve(
@@ -358,12 +412,15 @@ export class Generator {
                                                             content: [],
                                                             requestFunctionFilePath:
                                                                 syntheticalConfig.requestFunctionFilePath
-                                                                    ? path.resolve(
-                                                                          this
-                                                                              .options
-                                                                              .cwd,
-                                                                          syntheticalConfig.requestFunctionFilePath
-                                                                      )
+                                                                    ? path.isAbsolute(syntheticalConfig.requestFunctionFilePath)
+                                                                        ? path.resolve(
+                                                                              this.options.cwd,
+                                                                              syntheticalConfig.requestFunctionFilePath
+                                                                          )
+                                                                        : path.resolve(
+                                                                              this.options.cwd,
+                                                                              syntheticalConfig.requestFunctionFilePath
+                                                                          )
                                                                     : path.join(
                                                                           path.dirname(
                                                                               outputFilePath
@@ -378,14 +435,15 @@ export class Generator {
                                                                     ? syntheticalConfig
                                                                           .reactHooks
                                                                           .requestHookMakerFilePath
-                                                                        ? path.resolve(
-                                                                              this
-                                                                                  .options
-                                                                                  .cwd,
-                                                                              syntheticalConfig
-                                                                                  .reactHooks
-                                                                                  .requestHookMakerFilePath
-                                                                          )
+                                                                        ? path.isAbsolute(syntheticalConfig.reactHooks.requestHookMakerFilePath)
+                                                                            ? path.resolve(
+                                                                                  this.options.cwd,
+                                                                                  syntheticalConfig.reactHooks.requestHookMakerFilePath
+                                                                              )
+                                                                            : path.resolve(
+                                                                                  this.options.cwd,
+                                                                                  syntheticalConfig.reactHooks.requestHookMakerFilePath
+                                                                              )
                                                                         : path.join(
                                                                               path.dirname(
                                                                                   outputFilePath
@@ -441,17 +499,18 @@ export class Generator {
     /**
      * 生成index.ts文件，将目录中的所有方法和interface类型导出
      * @param directoryPaths 目录路径
+     * @param outputDir 输出目录，默认为 'src/service'
      */
-    async generateIndexFile(directoryPaths: string[]) {
+    async generateIndexFile(directoryPaths: string[], outputDir: string = 'src/service') {
+        const indexPath = path.resolve(this.options.cwd, outputDir, "index.ts");
+        
         // 检查目录是否存在
         if (
-            !(await fs.pathExists(
-                path.resolve(this.options.cwd, "src/service/index.ts")
-            ))
+            !(await fs.pathExists(indexPath))
         ) {
             // 创建index.ts文件
             await fs.writeFile(
-                path.resolve(this.options.cwd, "src/service/index.ts"),
+                indexPath,
                 ""
             );
         }
@@ -477,14 +536,14 @@ export class Generator {
             "/* prettier-ignore-start */\n/* tslint:disable */\n/* eslint-disable */\n\n/* 该文件由 cis-api-tool 自动生成，请勿直接修改！！！ */\n\n";
 
         // 生成index.ts文件内容
-        const indexContent = transformPaths(Array.from(allDirectories)).join(
+        const indexContent = transformPaths(Array.from(allDirectories), outputDir).join(
             "\n"
         );
         content += indexContent;
         content += "\n/* prettier-ignore-end */";
 
         await fs.writeFile(
-            path.resolve(this.options.cwd, "src/service/index.ts"),
+            indexPath,
             content
         );
     }
@@ -608,15 +667,21 @@ export class Generator {
                 import { useState, useEffect } from 'react'
                 import type { RequestConfig } from 'cis-api-tool'
                 import type { Request } from ${JSON.stringify(
-                    getNormalizedRelativePath(
+                    getNormalizedPathWithAlias(
                         requestHookMakerFilePath,
-                        outputFilePath
+                        outputFilePath,
+                        typeof syntheticalConfig.outputDir === 'string' 
+                            ? syntheticalConfig.outputDir 
+                            : 'src/service'
                     )
                 )}
                 import baseRequest from ${JSON.stringify(
-                    getNormalizedRelativePath(
+                    getNormalizedPathWithAlias(
                         requestHookMakerFilePath,
-                        requestFunctionFilePath
+                        requestFunctionFilePath,
+                        typeof syntheticalConfig.outputDir === 'string' 
+                            ? syntheticalConfig.outputDir 
+                            : 'src/service'
                     )
                 )}
 
@@ -666,9 +731,12 @@ export class Generator {
                             : dedent`
                         // @ts-ignore
                         import request from ${JSON.stringify(
-                            getNormalizedRelativePath(
+                            getNormalizedPathWithAlias(
                                 outputFilePath,
-                                requestFunctionFilePath
+                                requestFunctionFilePath,
+                                typeof syntheticalConfig.outputDir === 'string' 
+                                    ? syntheticalConfig.outputDir 
+                                    : 'src/service'
                             )
                         )}
 
@@ -721,7 +789,18 @@ export class Generator {
                 return dir !== otherDir && dir.startsWith(otherDir + path.sep);
             });
         });
-        await this.generateIndexFile(rootDirs);
+        
+        // 从配置中获取输出目录，默认使用 'src/service'
+        let outputDir = 'src/service';
+        if (this.config[0]?.outputDir) {
+            if (typeof this.config[0].outputDir === 'string') {
+                outputDir = this.config[0].outputDir;
+            } else {
+                // 如果是函数，使用默认值
+                outputDir = 'src/service';
+            }
+        }
+        await this.generateIndexFile(rootDirs, outputDir);
         return outputFileList;
     }
 

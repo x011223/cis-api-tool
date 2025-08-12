@@ -20,6 +20,8 @@ export default defineConfig([
       enabled: false,
     },
     prodEnvName: 'production',
+    // 输出目录，默认为 'src/service'
+    outputDir: 'src/service',
     requestFunctionFilePath: 'src/service/request.ts',
     dataKey: 'data',
     projects: [

@@ -14,5 +14,6 @@ package-lock.json
 docs/dist
 dist
 src/service/*
+src/api/*
 .idea/*
 .cursor/*
