@@ -15,7 +15,7 @@ import nodeFetch from "node-fetch";
 import path from "path";
 import prettier from "prettier";
 import ProxyAgent from "proxy-agent";
-import PinyinPro from "pinyin-pro";
+import { pinyin } from "pinyin-pro";
 import toJsonSchema from "to-json-schema";
 import { URL } from "url";
 import { FileData } from "./helpers";
@@ -887,7 +887,7 @@ export function getOutputFilePath(
                 .split("")
                 .map((item) => {
                     return changeCase.upperCaseFirst(
-                        changeCase.lowerCase(PinyinPro.pinyin(item, { toneType: 'none' }))
+                        changeCase.lowerCase(pinyin(item, { toneType: 'none' }))
                     );
                 })
                 .join("");
