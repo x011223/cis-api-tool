@@ -1008,15 +1008,24 @@ export class Generator {
         // 处理路径参数，将 {paramName} 格式替换为模板字符串格式
         const processPathParams = (
             path: string
-        ): { processedPath: string; useTemplate: boolean } => {
+        ): { processedPath: string; useTemplate: boolean; pathParamNames: string[]; originalPathParamNames: string[] } => {
             // 检查是否包含路径参数
             const hasPathParams = /\{[^}]+\}/.test(path);
             if (!hasPathParams) {
-                return { processedPath: path, useTemplate: false };
+                return { processedPath: path, useTemplate: false, pathParamNames: [], originalPathParamNames: [] };
             }
             // 匹配 {paramName} 格式的路径参数
-            const processedPath = path.replace(/\{([^}]+)\}/g, "${params.$1}");
-            return { processedPath, useTemplate: true };
+            const pathParamNames: string[] = [];
+            const originalPathParamNames: string[] = [];
+            const processedPath = path.replace(/\{([^}]+)\}/g, (match, paramName) => {
+                // 保存原始参数名称
+                originalPathParamNames.push(paramName);
+                // 确保参数名称是有效的标识符，如果是数字则添加前缀
+                const validParamName = /^\d+$/.test(paramName) ? `param_${paramName}` : paramName;
+                pathParamNames.push(validParamName);
+                return "${params." + validParamName + "}";
+            });
+            return { processedPath, useTemplate: true, pathParamNames, originalPathParamNames };
         };
 
         // 接口注释
@@ -1125,7 +1134,7 @@ export class Generator {
         };
 
         // 处理路径参数
-        const { processedPath, useTemplate } = processPathParams(
+        const { processedPath, useTemplate, pathParamNames, originalPathParamNames } = processPathParams(
             extendedInterfaceInfo.path
         );
 
@@ -1157,7 +1166,11 @@ export class Generator {
                         useTemplate
                             ? `\`${processedPath}\``
                             : JSON.stringify(processedPath)
-                    }, params
+                    }${
+                        originalPathParamNames.length > 0 
+                            ? ``
+                            : `, params`
+                    }
                   )
                 }
               `
