@@ -225,6 +225,8 @@ export interface Interface {
         example: string;
         /** 类型（YApi-X） */
         type?: RequestParamType;
+        /** 完整的 JSON Schema 定义（用于复杂类型如数组） */
+        schema?: any;
     }>;
     /** 仅 GET：请求串 */
     req_query: Array<{
@@ -238,6 +240,8 @@ export interface Interface {
         required: Required;
         /** 类型（YApi-X） */
         type?: RequestQueryType;
+        /** 完整的 JSON Schema 定义（用于复杂类型如数组） */
+        schema?: any;
     }>;
     /** 仅 POST：请求内容类型。为 text, file, raw 时不必特殊处理。 */
     req_body_type: RequestBodyType;
@@ -801,6 +805,8 @@ export interface PropDefinition {
     type: JSONSchema4["type"];
     /** 注释 */
     comment: string;
+    /** 完整的 JSON Schema 定义（用于复杂类型如数组） */
+    schema?: JSONSchema4;
 }
 
 /** 属性定义列表 */

@@ -186,20 +186,20 @@ export class Generator {
                                                         ...serverConfig,
                                                         ...projectConfig,
                                                         ...categoryConfig,
-                                                        mockUrl:
-                                                            projectInfo.getMockUrl(),
+                                                        // mockUrl:
+                                                        //     projectInfo.getMockUrl(),
                                                     };
                                                 syntheticalConfig.target =
                                                     syntheticalConfig.target ||
                                                     "typescript";
-                                                syntheticalConfig.devUrl =
-                                                    projectInfo.getDevUrl(
-                                                        syntheticalConfig.devEnvName!
-                                                    );
-                                                syntheticalConfig.prodUrl =
-                                                    projectInfo.getProdUrl(
-                                                        syntheticalConfig.prodEnvName!
-                                                    );
+                                                // syntheticalConfig.devUrl =
+                                                //     projectInfo.getDevUrl(
+                                                //         syntheticalConfig.devEnvName!
+                                                //     );
+                                                // syntheticalConfig.prodUrl =
+                                                //     projectInfo.getProdUrl(
+                                                //         syntheticalConfig.prodEnvName!
+                                                //     );
 
                                                 // 接口列表
                                                 let interfaceList =
@@ -232,13 +232,30 @@ export class Generator {
                                                                 : interfaceInfo;
 
                                                         // 处理路径前缀
-                                                        if (_interfaceInfo && syntheticalConfig.pathPrefix) {
-                                                            const pathPrefix = syntheticalConfig.pathPrefix;
-                                                            if (_interfaceInfo.path.startsWith(pathPrefix)) {
-                                                                _interfaceInfo.path = _interfaceInfo.path.substring(pathPrefix.length);
+                                                        if (
+                                                            _interfaceInfo &&
+                                                            syntheticalConfig.pathPrefix
+                                                        ) {
+                                                            const pathPrefix =
+                                                                syntheticalConfig.pathPrefix;
+                                                            if (
+                                                                _interfaceInfo.path.startsWith(
+                                                                    pathPrefix
+                                                                )
+                                                            ) {
+                                                                _interfaceInfo.path =
+                                                                    _interfaceInfo.path.substring(
+                                                                        pathPrefix.length
+                                                                    );
                                                                 // 确保路径以 / 开头
-                                                                if (!_interfaceInfo.path.startsWith('/')) {
-                                                                    _interfaceInfo.path = '/' + _interfaceInfo.path;
+                                                                if (
+                                                                    !_interfaceInfo.path.startsWith(
+                                                                        "/"
+                                                                    )
+                                                                ) {
+                                                                    _interfaceInfo.path =
+                                                                        "/" +
+                                                                        _interfaceInfo.path;
                                                                 }
                                                             }
                                                         }
@@ -441,11 +458,15 @@ export class Generator {
 
         // 递归处理所有目录，包括子目录
         const allDirectories = new Set<string>();
-        
+
         // 收集所有目录和子目录
         for (const dir of directoryPaths) {
             // 检查根目录是否有 index.ts 文件
-            const rootIndexPath = path.resolve(this.options.cwd, dir, 'index.ts');
+            const rootIndexPath = path.resolve(
+                this.options.cwd,
+                dir,
+                "index.ts"
+            );
             if (await fs.pathExists(rootIndexPath)) {
                 allDirectories.add(dir);
             }
@@ -454,12 +475,14 @@ export class Generator {
 
         let content =
             "/* prettier-ignore-start */\n/* tslint:disable */\n/* eslint-disable */\n\n/* 该文件由 cis-api-tool 自动生成，请勿直接修改！！！ */\n\n";
-        
+
         // 生成index.ts文件内容
-        const indexContent = transformPaths(Array.from(allDirectories)).join("\n");
+        const indexContent = transformPaths(Array.from(allDirectories)).join(
+            "\n"
+        );
         content += indexContent;
         content += "\n/* prettier-ignore-end */";
-        
+
         await fs.writeFile(
             path.resolve(this.options.cwd, "src/service/index.ts"),
             content
@@ -467,7 +490,10 @@ export class Generator {
     }
 
     // 新增方法：递归收集子目录
-    private async collectSubDirectories(dirPath: string, allDirectories: Set<string>) {
+    private async collectSubDirectories(
+        dirPath: string,
+        allDirectories: Set<string>
+    ) {
         try {
             const fullPath = path.resolve(this.options.cwd, dirPath);
             if (await fs.pathExists(fullPath)) {
@@ -478,21 +504,27 @@ export class Generator {
                     if (stat.isDirectory()) {
                         // 使用 path.join 来确保路径分隔符的一致性
                         const subDirPath = path.join(dirPath, item);
-                        
+
                         // 检查子目录是否有 index.ts 文件
-                        const indexFilePath = path.join(itemPath, 'index.ts');
+                        const indexFilePath = path.join(itemPath, "index.ts");
                         if (await fs.pathExists(indexFilePath)) {
                             allDirectories.add(subDirPath);
                         }
-                        
+
                         // 递归处理子目录
-                        await this.collectSubDirectories(subDirPath, allDirectories);
+                        await this.collectSubDirectories(
+                            subDirPath,
+                            allDirectories
+                        );
                     }
                 }
             }
         } catch (error) {
             // 忽略错误，继续处理其他目录
-            console.warn(`Warning: Failed to collect subdirectories for ${dirPath}:`, error);
+            console.warn(
+                `Warning: Failed to collect subdirectories for ${dirPath}:`,
+                error
+            );
         }
     }
 
@@ -895,14 +927,16 @@ export class Generator {
                 : "";
 
         // 处理路径参数，将 {paramName} 格式替换为模板字符串格式
-        const processPathParams = (path: string): { processedPath: string; useTemplate: boolean } => {
+        const processPathParams = (
+            path: string
+        ): { processedPath: string; useTemplate: boolean } => {
             // 检查是否包含路径参数
             const hasPathParams = /\{[^}]+\}/.test(path);
             if (!hasPathParams) {
                 return { processedPath: path, useTemplate: false };
             }
             // 匹配 {paramName} 格式的路径参数
-            const processedPath = path.replace(/\{([^}]+)\}/g, '${params.$1}');
+            const processedPath = path.replace(/\{([^}]+)\}/g, "${params.$1}");
             return { processedPath, useTemplate: true };
         };
 
@@ -1012,13 +1046,19 @@ export class Generator {
         };
 
         // 处理路径参数
-        const { processedPath, useTemplate } = processPathParams(extendedInterfaceInfo.path);
+        const { processedPath, useTemplate } = processPathParams(
+            extendedInterfaceInfo.path
+        );
 
         return dedent`
-            ${genComment((title) => `@description 接口 ${title} 的 **请求类型**`)}
+            ${genComment(
+                (title) => `@description 接口 ${title} 的 **请求类型**`
+            )}
             ${requestDataType.trim()}
 
-            ${genComment((title) => `@description 接口 ${title} 的 **返回类型**`)}
+            ${genComment(
+                (title) => `@description 接口 ${title} 的 **返回类型**`
+            )}
             ${responseDataType.trim()}
 
       ${
@@ -1034,7 +1074,11 @@ export class Generator {
                   params: ${requestDataTypeName!}
                 ) => {
                   return request.${extendedInterfaceInfo.method.toLowerCase()}<${responseDataTypeName!}>(
-                    ${useTemplate ? `\`${processedPath}\`` : JSON.stringify(processedPath)}, params
+                    ${
+                        useTemplate
+                            ? `\`${processedPath}\``
+                            : JSON.stringify(processedPath)
+                    }, params
                   )
                 }
               `

@@ -268,7 +268,7 @@ export function jsonSchemaToJSTTJsonSchema(
 
 /**
  * @description 将 JSONSchema 字符串转为 JSONSchema 对象。
- * @param str 要转换的 JSONSchema 字符串
+ *jsonSchemaStringToJsonSchema @param str 要转换的 JSONSchema 字符串
  * @returns 转换后的 JSONSchema 对象
  */
 export function jsonSchemaStringToJsonSchema(
@@ -378,13 +378,25 @@ export function propDefinitionsToJsonSchema(
             properties: propDefinitions.reduce<
                 Exclude<JSONSchema4["properties"], undefined>
             >((res, prop) => {
-                res[prop.name] = {
-                    type: prop.type,
-                    description: prop.comment,
-                    ...(prop.type === ("file" as any)
-                        ? { tsType: FileData.name }
-                        : {}),
-                };
+                // 如果属性有完整的 schema 定义，优先使用它
+                if (prop.schema) {
+                    res[prop.name] = {
+                        ...prop.schema,
+                        description: prop.comment,
+                        ...(prop.schema.type === ("file" as any)
+                            ? { tsType: FileData.name }
+                            : {}),
+                    };
+                } else {
+                    // 否则使用基本的 type 字段
+                    res[prop.name] = {
+                        type: prop.type,
+                        description: prop.comment,
+                        ...(prop.type === ("file" as any)
+                            ? { tsType: FileData.name }
+                            : {}),
+                    };
+                }
                 return res;
             }, {}),
         },
@@ -453,6 +465,8 @@ export function getRequestDataJsonSchema(
                     })),
                     customTypeMapping
                 );
+
+    
                 break;
             case RequestBodyType.json:
                 if (interfaceInfo.req_body_other) {
@@ -481,6 +495,7 @@ export function getRequestDataJsonSchema(
                 required: item.required === Required.true,
                 type: item.type || "string",
                 comment: item.desc,
+                schema: (item as any).schema, // 传递 schema 字段
             })),
             customTypeMapping
         );
@@ -511,6 +526,7 @@ export function getRequestDataJsonSchema(
                 required: true,
                 type: item.type || "string",
                 comment: item.desc,
+                schema: (item as any).schema, // 传递 schema 字段
             })),
             customTypeMapping
         );

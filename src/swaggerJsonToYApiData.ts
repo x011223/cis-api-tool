@@ -254,6 +254,112 @@ function handleSwagger(data, originTags = []) {
         return json;
     }
 
+    /**
+     * 从 schema 中提取类型信息
+     * @param schema 参数或响应的 schema 对象
+     * @returns 类型字符串
+     */
+    function extractTypeFromSchema(schema) {
+        if (!schema || typeof schema !== 'object') {
+            return 'string'; // 默认类型
+        }
+
+        // 如果 schema 有 type 字段
+        if (schema.type) {
+            if (schema.type === 'array' && schema.items) {
+                // 数组类型，需要特殊处理
+                const itemType = extractTypeFromSchema(schema.items);
+                return `array<${itemType}>`;
+            }
+            return schema.type;
+        }
+
+        // 如果 schema 有 $ref，尝试解析引用
+        if (schema.$ref) {
+            // 这里可以添加对 $ref 的处理逻辑
+            return 'object';
+        }
+
+        // 如果 schema 有 properties，说明是对象类型
+        if (schema.properties) {
+            return 'object';
+        }
+
+        // 如果 schema 有 enum，说明是枚举类型
+        if (schema.enum) {
+            return 'string';
+        }
+
+        // 如果 schema 有 format，根据 format 推断类型
+        if (schema.format) {
+            switch (schema.format) {
+                case 'int32':
+                case 'int64':
+                    return 'integer';
+                case 'float':
+                case 'double':
+                    return 'number';
+                case 'date':
+                case 'date-time':
+                    return 'string';
+                default:
+                    return 'string';
+            }
+        }
+
+        return 'string'; // 默认类型
+    }
+
+    /**
+     * 从 schema 中提取类型信息，返回标准类型字符串
+     * @param schema 参数或响应的 schema 对象
+     * @returns 标准类型字符串
+     */
+    function getStandardTypeFromSchema(schema) {
+        if (!schema || typeof schema !== 'object') {
+            return 'string'; // 默认类型
+        }
+
+        // 如果 schema 有 type 字段
+        if (schema.type) {
+            return schema.type;
+        }
+
+        // 如果 schema 有 $ref，尝试解析引用
+        if (schema.$ref) {
+            return 'object';
+        }
+
+        // 如果 schema 有 properties，说明是对象类型
+        if (schema.properties) {
+            return 'object';
+        }
+
+        // 如果 schema 有 enum，说明是枚举类型
+        if (schema.enum) {
+            return 'string';
+        }
+
+        // 如果 schema 有 format，根据 format 推断类型
+        if (schema.format) {
+            switch (schema.format) {
+                case 'int32':
+                case 'int64':
+                    return 'integer';
+                case 'float':
+                case 'double':
+                    return 'number';
+                case 'date':
+                case 'date-time':
+                    return 'string';
+                default:
+                    return 'string';
+            }
+        }
+
+        return 'string'; // 默认类型
+    }
+
     if (data.parameters && Array.isArray(data.parameters)) {
         data.parameters.forEach((param) => {
             if (param && typeof param === "object" && param.$ref) {
@@ -270,31 +376,78 @@ function handleSwagger(data, originTags = []) {
             if (param.in) {
                 switch (param.in) {
                     case "path":
-                        defaultParam.type = param.type;
+                        // 优先使用 schema 中的类型，如果没有则使用 param.type
+                        if (param.schema) {
+                            defaultParam.type = getStandardTypeFromSchema(param.schema);
+                            // 如果是数组类型，需要特殊处理
+                            if (param.schema.type === 'array' && param.schema.items) {
+                                defaultParam.schema = param.schema;
+                            }
+                        } else {
+                            defaultParam.type = param.type;
+                        }
                         api.req_params.push(defaultParam);
                         break;
                     case "query":
-                        defaultParam.type = param.type;
+                        // 优先使用 schema 中的类型，如果没有则使用 param.type
+                        if (param.schema) {
+                            defaultParam.type = getStandardTypeFromSchema(param.schema);
+                            // 如果是数组类型，需要特殊处理
+                            if (param.schema.type === 'array' && param.schema.items) {
+                                defaultParam.schema = param.schema;
+                            }
+                        } else {
+                            defaultParam.type = param.type;
+                        }
                         api.req_query.push(defaultParam);
                         break;
                     case "body":
                         handleBodyPamras(param.schema, api);
                         break;
                     case "formData":
-                        defaultParam.type =
-                            param.type === "file" ? "file" : "text";
+                        // 优先使用 schema 中的类型，如果没有则使用 param.type
+                        if (param.schema) {
+                            const formType = getStandardTypeFromSchema(param.schema);
+                            defaultParam.type = formType === "file" ? "file" : "text";
+                            // 如果是数组类型，需要特殊处理
+                            if (param.schema.type === 'array' && param.schema.items) {
+                                defaultParam.schema = param.schema;
+                            }
+                        } else {
+                            defaultParam.type = param.type === "file" ? "file" : "text";
+                        }
                         if (param.example) {
                             defaultParam.example = param.example;
                         }
                         api.req_body_form.push(defaultParam);
                         break;
                     case "header":
+                        // 优先使用 schema 中的类型，如果没有则使用 param.type
+                        if (param.schema) {
+                            defaultParam.type = getStandardTypeFromSchema(param.schema);
+                            // 如果是数组类型，需要特殊处理
+                            if (param.schema.type === 'array' && param.schema.items) {
+                                defaultParam.schema = param.schema;
+                            }
+                        } else {
+                            defaultParam.type = param.type;
+                        }
                         api.req_headers.push(defaultParam);
                         break;
                     default:
                         break;
                 }
             } else {
+                // 优先使用 schema 中的类型，如果没有则使用 param.type
+                if (param.schema) {
+                    defaultParam.type = getStandardTypeFromSchema(param.schema);
+                    // 如果是数组类型，需要特殊处理
+                    if (param.schema.type === 'array' && param.schema.items) {
+                        defaultParam.schema = param.schema;
+                    }
+                } else {
+                    defaultParam.type = param.type;
+                }
                 api.req_query.push(defaultParam);
             }
         });

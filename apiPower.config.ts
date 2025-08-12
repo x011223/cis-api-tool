@@ -2,6 +2,8 @@ import { defineConfig } from './src'
 
 export default defineConfig([
   {
+    // serverUrl: 'http://127.0.0.1:4523/export/openapi/2?version=3.1',
+    // serverType: 'swagger',
     // 方式1：使用基础URL + apifoxProjectId配置
     serverUrl: 'https://api.apifox.com',
     serverType: 'apifox',
@@ -22,7 +24,7 @@ export default defineConfig([
     dataKey: 'data',
     projects: [
       {
-        token: 'APS-LgZ1R00wf6AEgdHUzTPHBS3wZCBxPZdw',
+        token: 'APS-wO7pmSdkfiCKTxaBzr6gMVZJLqhdPm9B',
         categories: [
           {
             id: 0,
