@@ -993,6 +993,11 @@ export class Generator {
             responseDataJsonSchema,
             responseDataTypeName!
         );
+        
+        // 检查类型是否为空
+        const isRequestDataTypeEmpty = requestDataType.trim() === `export interface ${requestDataTypeName} {}`;
+        const isResponseDataTypeEmpty = responseDataType.trim() === `export interface ${responseDataTypeName} {}`;
+        
         const isRequestDataOptional = /(\{\}|any)$/g.test(requestDataType);
         const requestHookName =
             syntheticalConfig.reactHooks && syntheticalConfig.reactHooks.enabled
@@ -1091,9 +1096,9 @@ export class Generator {
                     value: process.env.JEST_WORKER_ID // 测试时使用 unix 时间戳
                         ? String(extendedInterfaceInfo.up_time)
                         : /* istanbul ignore next */
-                          `\`${dayjs(
+                          `${dayjs(
                               extendedInterfaceInfo.up_time * 1000
-                          ).format("YYYY-MM-DD HH:mm:ss")}\``,
+                          ).format("YYYY-MM-DD HH:mm:ss")}`,
                 },
             ];
             if (typeof extraTags === "function") {
@@ -1138,30 +1143,42 @@ export class Generator {
             extendedInterfaceInfo.path
         );
 
-        return dedent`
-            ${genComment(
-                (title) => `@description 接口 ${title} 的 **请求类型**`
-            )}
-            ${requestDataType.trim()}
-
-            ${genComment(
-                (title) => `@description 接口 ${title} 的 **返回类型**`
-            )}
-            ${responseDataType.trim()}
-
-      ${
-          syntheticalConfig.typesOnly
-              ? ""
-              : dedent`
+        // 构建类型定义部分
+        const typeDefinitions: string[] = [];
+        
+        // 只有当请求类型不为空时才添加
+        if (!isRequestDataTypeEmpty) {
+            typeDefinitions.push(dedent`
+                ${genComment(
+                    (title) => `@description 接口 ${title} 的 **请求类型**`
+                )}
+                ${requestDataType.trim()}
+            `);
+        }
+        
+        // 只有当响应类型不为空时才添加
+        if (!isResponseDataTypeEmpty) {
+            typeDefinitions.push(dedent`
+                ${genComment(
+                    (title) => `@description 接口 ${title} 的 **返回类型**`
+                )}
+                ${responseDataType.trim()}
+            `);
+        }
+        
+        // 构建请求函数部分
+        const requestFunction = syntheticalConfig.typesOnly
+            ? ""
+            : dedent`
                 ${genComment(
                     (title) => `@description 接口 ${title} 的 **请求函数**`
                 )}
                 export const ${
                     requestFunctionName || "ErrorRequestFunctionName"
                 } = (
-                  params: ${requestDataTypeName!}
+                  params: ${isRequestDataTypeEmpty ? 'Record<string, never>' : requestDataTypeName!}
                 ) => {
-                  return request.${extendedInterfaceInfo.method.toLowerCase()}<${responseDataTypeName!}>(
+                  return request.${extendedInterfaceInfo.method.toLowerCase()}<${isResponseDataTypeEmpty ? 'any' : responseDataTypeName!}>(
                     ${
                         useTemplate
                             ? `\`${processedPath}\``
@@ -1173,9 +1190,13 @@ export class Generator {
                     }
                   )
                 }
-              `
-      }
-    `;
+              `;
+        
+        return dedent`
+            ${typeDefinitions.join('\n\n')}
+            
+            ${requestFunction}
+        `;
     }
 
     async destroy() {
