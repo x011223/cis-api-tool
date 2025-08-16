@@ -466,7 +466,6 @@ export function getRequestDataJsonSchema(
                     customTypeMapping
                 );
 
-    
                 break;
             case RequestBodyType.json:
                 if (interfaceInfo.req_body_other) {
@@ -873,7 +872,7 @@ export function getReponseDataTypeName(
 export function getOutputFilePath(
     interfaceInfo: Interface,
     changeCase: ChangeCase,
-    outputDir: string = 'src/service'
+    outputDir: string = "src/service"
 ): string {
     const dirName = interfaceInfo._category.name;
     // dirName 为 客户管理/业务套餐
@@ -881,14 +880,19 @@ export function getOutputFilePath(
     // 将中文转换为拼音
     const dirNameCn = dirName
         .split("/")
+        .filter(Boolean)
         .map((segment) => {
             // 客户管理
             return segment
                 .split("")
                 .map((item) => {
-                    return changeCase.upperCaseFirst(
-                        changeCase.lowerCase(pinyin(item, { toneType: 'none' }))
-                    );
+                    return changeCase
+                        .upperCaseFirst(
+                            changeCase.lowerCase(
+                                pinyin(item, { toneType: "none" })
+                            )
+                        )
+                        .trim();
                 })
                 .join("");
         })
@@ -896,51 +900,62 @@ export function getOutputFilePath(
     return `${outputDir}/${dirNameCn}/index.ts`;
 }
 
-export function transformPaths(pathsArray: string[], outputDir: string = 'src/service') {
+export function transformPaths(
+    pathsArray: string[],
+    outputDir: string = "src/service"
+) {
     // 目标路径片段，用于定位需要截取的位置
-    const targetSegments = outputDir.split('/');
+    const targetSegments = outputDir.split("/");
 
-    return pathsArray.map((originalPath) => {
-        // 规范化路径，处理不同系统的分隔符
-        const normalizedPath = path.normalize(originalPath);
-        // 拆分路径为片段数组
-        const pathSegments = normalizedPath.split(path.sep);
+    return pathsArray
+        .map((originalPath) => {
+            // 规范化路径，处理不同系统的分隔符
+            const normalizedPath = path.normalize(originalPath);
+            // 拆分路径为片段数组
+            const pathSegments = normalizedPath.split(path.sep);
 
-        // 查找输出目录连续出现的位置
-        let targetIndex = -1;
-        for (let i = 0; i < pathSegments.length - targetSegments.length + 1; i++) {
-            let found = true;
-            for (let j = 0; j < targetSegments.length; j++) {
-                if (pathSegments[i + j] !== targetSegments[j]) {
-                    found = false;
+            // 查找输出目录连续出现的位置
+            let targetIndex = -1;
+            for (
+                let i = 0;
+                i < pathSegments.length - targetSegments.length + 1;
+                i++
+            ) {
+                let found = true;
+                for (let j = 0; j < targetSegments.length; j++) {
+                    if (pathSegments[i + j] !== targetSegments[j]) {
+                        found = false;
+                        break;
+                    }
+                }
+                if (found) {
+                    targetIndex = i;
                     break;
                 }
             }
-            if (found) {
-                targetIndex = i;
-                break;
+
+            if (targetIndex === -1) {
+                // 如果未找到目标片段，返回原始路径（可根据需求调整错误处理）
+                return `// 无法处理路径: ${originalPath}`;
             }
-        }
 
-        if (targetIndex === -1) {
-            // 如果未找到目标片段，返回原始路径（可根据需求调整错误处理）
-            return `// 无法处理路径: ${originalPath}`;
-        }
+            // 提取输出目录之后的路径片段
+            const relativeSegments = pathSegments.slice(
+                targetIndex + targetSegments.length
+            );
 
-        // 提取输出目录之后的路径片段
-        const relativeSegments = pathSegments.slice(targetIndex + targetSegments.length);
-        
-        // 如果没有相对路径片段，说明是输出目录本身
-        if (relativeSegments.length === 0) {
-            return `// 根目录: ${originalPath}`;
-        }
-        
-        // 组合为相对路径，使用 POSIX 风格的 '/' 作为分隔符（符合导入语句规范）
-        const relativePath = "./" + relativeSegments.join("/") + "/index";
+            // 如果没有相对路径片段，说明是输出目录本身
+            if (relativeSegments.length === 0) {
+                return `// 根目录: ${originalPath}`;
+            }
 
-        // 生成导出语句
-        return `export * from '${relativePath}'`;
-    }).filter(Boolean); // 过滤掉空值和注释
+            // 组合为相对路径，使用 POSIX 风格的 '/' 作为分隔符（符合导入语句规范）
+            const relativePath = "./" + relativeSegments.join("/") + "/index";
+
+            // 生成导出语句
+            return `export * from '${relativePath}'`;
+        })
+        .filter(Boolean); // 过滤掉空值和注释
 }
 
 /**
@@ -949,27 +964,30 @@ export function transformPaths(pathsArray: string[], outputDir: string = 'src/se
  * @param outputDir 输出目录
  * @returns alias 路径
  */
-export function getAliasPath(relativePath: string, outputDir: string = 'src/service'): string {
+export function getAliasPath(
+    relativePath: string,
+    outputDir: string = "src/service"
+): string {
     // 如果路径已经是 alias 格式，直接返回
-    if (relativePath.startsWith('@/')) {
+    if (relativePath.startsWith("@/")) {
         return relativePath;
     }
-    
+
     // 将路径标准化，统一使用 POSIX 分隔符
-    const normalizedPath = relativePath.replace(/\\/g, '/');
-    
+    const normalizedPath = relativePath.replace(/\\/g, "/");
+
     // 检查路径是否在 src 目录下
-    if (normalizedPath.includes('/src/')) {
+    if (normalizedPath.includes("/src/")) {
         // 查找最后一个 /src/ 的位置，这通常是真正的 src 目录
-        const lastSrcIndex = normalizedPath.lastIndexOf('/src/');
+        const lastSrcIndex = normalizedPath.lastIndexOf("/src/");
         if (lastSrcIndex !== -1) {
             const afterSrc = normalizedPath.substring(lastSrcIndex + 5); // 5 = '/src/'.length
             // 移除文件扩展名
-            const withoutExt = afterSrc.replace(/\.(ts|js|tsx|jsx)$/, '');
+            const withoutExt = afterSrc.replace(/\.(ts|js|tsx|jsx)$/, "");
             return `@/${withoutExt}`;
         }
     }
-    
+
     // 如果无法转换，返回原始路径
     return relativePath;
 }
@@ -984,15 +1002,15 @@ export function getAliasPath(relativePath: string, outputDir: string = 'src/serv
 export function getNormalizedPathWithAlias(
     from: string,
     to: string,
-    outputDir: string = 'src/service'
+    outputDir: string = "src/service"
 ): string {
     // 首先尝试使用 alias 路径
     // 对于 requestFunctionFilePath，我们应该根据其实际位置生成 alias 路径
     const aliasPath = getAliasPath(to);
-    if (aliasPath.startsWith('@/')) {
+    if (aliasPath.startsWith("@/")) {
         return aliasPath;
     }
-    
+
     // 如果无法使用 alias，回退到相对路径
     return getNormalizedRelativePath(from, to);
 }
