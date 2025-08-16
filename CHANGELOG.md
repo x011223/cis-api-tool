@@ -1,6 +1,13 @@
 # 更新日志
 
 
+### [0.0.23](https://github.com/x011223/cis-api-tool/compare/v0.0.22...v0.0.23) (2025-08-16)
+
+
+### 修复
+
+* 去掉文件夹空格 ([87da81b](https://github.com/x011223/cis-api-tool/commit/87da81b894571f3705c7ffaf8b1859e27a94dc79))
+
 ### [0.0.22](https://github.com/x011223/cis-api-tool/compare/v0.0.21...v0.0.22) (2025-08-12)
 
 ### [0.0.21](https://github.com/x011223/cis-api-tool/compare/v0.0.20...v0.0.21) (2025-08-12)
