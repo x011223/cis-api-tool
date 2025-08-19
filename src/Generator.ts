@@ -1076,7 +1076,7 @@ export class Generator {
                 },
                 hasTag && {
                     label: "tags",
-                    value: extendedInterfaceInfo.tag.map((tag) => `\`${tag}\``),
+                    value: extendedInterfaceInfo.tag.map((tag) => `${tag}`),
                 },
                 hasRequestHeader && {
                     label: "method",
@@ -1086,15 +1086,15 @@ export class Generator {
                     label: "path",
                     value: `${extendedInterfaceInfo.path}`,
                 },
-                hasUpdateTime && {
-                    label: "updateTime",
-                    value: process.env.JEST_WORKER_ID // 测试时使用 unix 时间戳
-                        ? String(extendedInterfaceInfo.up_time)
-                        : /* istanbul ignore next */
-                          `\`${dayjs(
-                              extendedInterfaceInfo.up_time * 1000
-                          ).format("YYYY-MM-DD HH:mm:ss")}\``,
-                },
+                // hasUpdateTime && {
+                //     label: "updateTime",
+                //     value: process.env.JEST_WORKER_ID // 测试时使用 unix 时间戳
+                //         ? String(extendedInterfaceInfo.up_time)
+                //         : /* istanbul ignore next */
+                //           `\`${dayjs(
+                //               extendedInterfaceInfo.up_time * 1000
+                //           ).format("YYYY-MM-DD HH:mm:ss")}\``,
+                // },
             ];
             if (typeof extraTags === "function") {
                 const tags = extraTags(extendedInterfaceInfo);
