@@ -1,6 +1,13 @@
 # 更新日志
 
 
+### [0.0.25](https://github.com/x011223/cis-api-tool/compare/v0.0.24...v0.0.25) (2025-08-19)
+
+
+### 修复
+
+* 去除注释中不必要的链接 ([562c23c](https://github.com/x011223/cis-api-tool/commit/562c23c92a2944af5ced231d7f507fb8a3d35459))
+
 ### [0.0.24](https://github.com/x011223/cis-api-tool/compare/v0.0.23...v0.0.24) (2025-08-19)
 
 
