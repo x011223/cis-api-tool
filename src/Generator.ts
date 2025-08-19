@@ -1058,9 +1058,7 @@ export class Generator {
                 /\//g,
                 "\\/"
             );
-            const description = hasLink
-                ? `[${escapedTitle}↗](${extendedInterfaceInfo._url})`
-                : escapedTitle;
+            const description = escapedTitle;
             const summary: Array<
                 | false
                 | {
@@ -1070,9 +1068,7 @@ export class Generator {
             > = [
                 hasCategory && {
                     label: "category",
-                    value: hasLink
-                        ? `[${extendedInterfaceInfo._category.name}↗](${extendedInterfaceInfo._category._url})`
-                        : extendedInterfaceInfo._category.name,
+                    value: extendedInterfaceInfo._category.name,
                 },
                 hasTag && {
                     label: "tags",
