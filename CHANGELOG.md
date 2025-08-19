@@ -1,6 +1,13 @@
 # 更新日志
 
 
+### [0.0.24](https://github.com/x011223/cis-api-tool/compare/v0.0.23...v0.0.24) (2025-08-19)
+
+
+### 修复
+
+* 去掉更新时间，减少代码变更 ([2d64ac7](https://github.com/x011223/cis-api-tool/commit/2d64ac786b6a2460e6604b2ffebfaf907c1a48f1))
+
 ### [0.0.23](https://github.com/x011223/cis-api-tool/compare/v0.0.22...v0.0.23) (2025-08-16)
 
 
