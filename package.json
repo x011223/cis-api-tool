@@ -39,7 +39,7 @@
         "docs:build": "dumi build",
         "docs:dev": "dumi dev",
         "release": "standard-version -a && pnpm build && pnpm docs && git push --follow-tags origin main && pnpm publish",
-        "releaseBeta": "standard-version -a --release-as patch --prerelease beta && pnpm build && git push --follow-tags origin master && npm publish --tag next"
+        "releaseBeta": "standard-version -a --release-as patch --prerelease beta && pnpm build && git push --follow-tags origin master && pnpm publish --tag next"
     },
     "husky": {
         "hooks": {
