@@ -7,9 +7,9 @@ import { OneOrMore, OmitStrict } from "./type";
  * @public
  */
 export const omitStrict = omit as any as <
-    T extends Record<any, any>,
-    K extends keyof T
+  T extends Record<any, any>,
+  K extends keyof T
 >(
-    object: T,
-    ...paths: Array<OneOrMore<K>>
+  object: T,
+  ...paths: Array<OneOrMore<K>>
 ) => OmitStrict<T, K>;
