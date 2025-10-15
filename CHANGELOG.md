@@ -1,6 +1,13 @@
 # 更新日志
 
 
+### [0.0.26](https://github.com/x011223/cis-api-tool/compare/v0.0.25...v0.0.26) (2025-10-15)
+
+
+### 特性
+
+* 兼容导出接口/代码格式 ([655cd33](https://github.com/x011223/cis-api-tool/commit/655cd333e47a0d62e819db9107ba00c5a753b993))
+
 ### [0.0.25](https://github.com/x011223/cis-api-tool/compare/v0.0.24...v0.0.25) (2025-08-19)
 
 
