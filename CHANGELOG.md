@@ -1,6 +1,13 @@
 # 更新日志
 
 
+### [0.0.34](https://github.com/x011223/cis-api-tool/compare/v0.0.33...v0.0.34) (2025-10-30)
+
+
+### 修复
+
+* 方法名 ([57d99d9](https://github.com/x011223/cis-api-tool/commit/57d99d9305b06d6e369a059281e4b96bbfc8c84c))
+
 ### [0.0.33](https://github.com/x011223/cis-api-tool/compare/v0.0.32...v0.0.33) (2025-10-30)
 
 ### [0.0.32](https://github.com/x011223/cis-api-tool/compare/v0.0.31...v0.0.32) (2025-10-30)
