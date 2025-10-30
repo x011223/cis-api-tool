@@ -1073,8 +1073,6 @@ export class Generator {
             const resBodySchema = JSON.parse(interfaceInfo.res_body);
             if (
               resBodySchema.type === "object" &&
-              resBodySchema.properties &&
-              Object.keys(resBodySchema.properties).length === 0 &&
               resBodySchema.content === "*/*"
             ) {
               return true;

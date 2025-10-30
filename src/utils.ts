@@ -745,9 +745,9 @@ export function getRequestFunctionName(
   // /api/system/v1/menu/query/{menuId}`
   // 返回 getSystemV1MenuQueryByMenuIdApi
 
+  const _method = interfaceInfo.method || "get";
   // 获取请求方法前缀
-  const methodPrefix =
-    interfaceInfo.method.toLowerCase() === "get" ? "get" : "post";
+  const methodPrefix = changeCase.pascalCase(_method.toLowerCase());
 
   // 处理路径
   let path = interfaceInfo.path;
@@ -786,9 +786,9 @@ export function getRequestDataTypeName(
   // /api/system/v1/menu/query/{menuId}`
   // 返回 GetSystemV1MenuQueryByMenuIdRequestType
 
+  const _method = interfaceInfo.method || "get";
   // 获取请求方法前缀
-  const methodPrefix =
-    interfaceInfo.method.toLowerCase() === "get" ? "Get" : "Post";
+  const methodPrefix = changeCase.pascalCase(_method.toLowerCase());
 
   // 处理路径
   let path = interfaceInfo.path;
@@ -827,9 +827,9 @@ export function getReponseDataTypeName(
   // /api/system/v1/menu/query/{menuId}`
   // 返回 GetSystemV1MenuQueryByMenuIdResponseType
 
+  const _method = interfaceInfo.method || "get";
   // 获取请求方法前缀
-  const methodPrefix =
-    interfaceInfo.method.toLowerCase() === "get" ? "Get" : "Post";
+  const methodPrefix = changeCase.pascalCase(_method.toLowerCase());
 
   // 处理路径
   let path = interfaceInfo.path;
