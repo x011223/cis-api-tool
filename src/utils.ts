@@ -747,8 +747,7 @@ export function getRequestFunctionName(
 
   const _method = interfaceInfo.method || "get";
   // 获取请求方法前缀
-  const methodPrefix = changeCase.pascalCase(_method.toLowerCase());
-
+  const methodPrefix = _method.toLowerCase();
   // 处理路径
   let path = interfaceInfo.path;
 
