@@ -1149,7 +1149,7 @@ export class Generator {
                       useTemplate
                         ? `\`${processedPath}\``
                         : JSON.stringify(processedPath)
-                    }${originalPathParamNames.length > 0 ? `` : `, params`}${
+                    }${originalPathParamNames.length > 0 ? (isDownloadInterface ? `, undefined` : ``) : `, params`}${
               isDownloadInterface
                 ? `, {
         responseType: 'blob',
