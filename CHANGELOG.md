@@ -1,6 +1,13 @@
 # 更新日志
 
 
+### [0.0.35](https://github.com/x011223/cis-api-tool/compare/v0.0.34...v0.0.35) (2025-11-18)
+
+
+### 修复
+
+* 路径参数的下载接口传递 axios config错误 ([b9a6053](https://github.com/x011223/cis-api-tool/commit/b9a6053afd63d0aef68ff0875b915817e0a92a31))
+
 ### [0.0.34](https://github.com/x011223/cis-api-tool/compare/v0.0.33...v0.0.34) (2025-10-30)
 
 
